@@ -118,5 +118,10 @@ public class NPC_Vic extends Entity {
 	
 	public void speak() {
 		super.speak();
+
+		// Check if all dialogues are complete
+		if(dialogueComplete && !gp.quest.talkedToVic) {
+			gp.quest.completeTalkToVic();
+		}
 	}
 }

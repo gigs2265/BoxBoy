@@ -146,22 +146,25 @@ public class TileManager {
     }
 
     public void draw(Graphics2D g2) {
-    	
-    	
+
+    	// Get clamped camera position to prevent black areas at map edges
+    	int cameraX = gp.getCameraX();
+    	int cameraY = gp.getCameraY();
+
         for (int worldCol = 0; worldCol < gp.maxWorldCol; worldCol++) {
             for (int worldRow = 0; worldRow < gp.maxWorldRow; worldRow++) {
                 int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
-                
+
                 int worldX = worldCol * gp.tileSize;
                 int worldY = worldRow * gp.tileSize;
-                int screenX = worldX - gp.player.worldX + gp.player.screenX;
-        		int screenY = worldY - gp.player.worldY + gp.player.screenY;
-        		
-        		if(worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-        				worldX - gp.tileSize < gp.player.worldX + gp.player.screenX&&
-        				worldY + gp.tileSize> gp.player.worldY - gp.player.screenY&&
-        				worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
-        			
+                int screenX = worldX - cameraX;
+        		int screenY = worldY - cameraY;
+
+        		if(worldX + gp.tileSize > cameraX &&
+        				worldX - gp.tileSize < cameraX + gp.screenWidth &&
+        				worldY + gp.tileSize > cameraY &&
+        				worldY - gp.tileSize < cameraY + gp.screenHeight) {
+
         			g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
         		}
 

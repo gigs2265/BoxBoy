@@ -27,6 +27,23 @@ public class UI {
     ArrayList<Integer> messageCounter = new ArrayList<>();
     public boolean gameFinshed = false;
     public String currentDialouge = "";
+    
+    // BRIAN DEFEAT CUTSCENE
+    public boolean brianCutsceneActive = false;
+    public int cutsceneIndex = 0;
+    entity.Entity cutsceneMonster;
+    public String[] brianCutscene = {
+        "Brian collapses, too weak to \nfight any longer...",
+        "Theo: Before I end this... \nanswer me one thing.",
+        "Theo: Why? Why were me and my \nfriends brought to this island?",
+        "Brian: *cough*... I took a man \nnamed Santuchii under my wing...",
+        "Brian: I used him to conduct my \nexperiments... to create the \nrat humanoids.",
+        "Brian: Santuchii died during \nthe process...",
+        "Brian: But I ate his dead body \nand absorbed his DNA.",
+        "Brian: Now I can poop out clones \nof the rat people... as many \nas I want...",
+        "Theo: ...That's the most disgusting \nthing I've ever heard.",
+        "Theo: This ends now."
+    };
     public int commandNum = 0;
     public int titleScreenState = 0;
     public int playerSlotCol = 0;
@@ -135,33 +152,60 @@ public class UI {
         int x = gp.tileSize * 12;
         int y = gp.tileSize / 2;
         int width = gp.tileSize * 7;
-        int height = gp.tileSize * 4;
-        
+        int height = gp.tileSize * 5; // Increased height for friend list
+
         drawSubWindow(x, y, width, height);
-        
+
         x += 25;
         y += gp.tileSize - 10;
-        
+
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 18f));
-        g2.drawString("QUEST: " + gp.quest.name, x, y);
-        
+        g2.drawString("QUEST: " + gp.quest.getQuestName(), x, y);
+
         y += 35;
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 16f));
         g2.drawString(gp.quest.getCurrentObjective(), x, y);
-        
+
         y += 28;
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 15f));
-        
-        String obj1 = (gp.quest.objective1 ? "[X]" : "[ ]") + " Find friends";
-        g2.drawString(obj1, x, y);
-        
-        y += 22;
-        String obj2 = (gp.quest.objective2 ? "[X]" : "[ ]") + " Defeat Nick";
-        g2.drawString(obj2, x, y);
-        
-        y += 22;
-        String obj3 = (gp.quest.objective3 ? "[X]" : "[ ]") + " Escape island";
-        g2.drawString(obj3, x, y);
+
+        // Show different objectives based on quest stage
+        if(!gp.quest.foundAllFriends) {
+            // Show friend checklist
+            String vic = (gp.quest.talkedToVic ? "[X]" : "[ ]") + " Vic";
+            g2.drawString(vic, x, y);
+            y += 22;
+
+            String mike = (gp.quest.foundMike ? "[X]" : "[ ]") + " Mike";
+            g2.drawString(mike, x, y);
+            y += 22;
+
+            String ian = (gp.quest.foundIan ? "[X]" : "[ ]") + " Ian";
+            g2.drawString(ian, x, y);
+            y += 22;
+
+            String liam = (gp.quest.foundLiam ? "[X]" : "[ ]") + " Liam";
+            g2.drawString(liam, x, y);
+            y += 22;
+
+            String miles = (gp.quest.foundMiles ? "[X]" : "[ ]") + " Miles";
+            g2.drawString(miles, x, y);
+        } else if(!gp.quest.foundJohn) {
+            // John quest
+            String john = "[ ] Find John";
+            g2.drawString(john, x, y);
+        } else if(!gp.quest.defeatedNick) {
+            // Nick quest
+            String nick = "[ ] Defeat Nick";
+            g2.drawString(nick, x, y);
+        } else if(!gp.quest.defeatedBrian) {
+            // Brian quest
+            String brian = "[ ] Defeat Brian";
+            g2.drawString(brian, x, y);
+        } else {
+            // All complete!
+            g2.drawString("[X] All Quests Complete!", x, y);
+        }
     }
     
     public void drawPlayerLife() {
@@ -327,51 +371,50 @@ public class UI {
     }
     
     public void drawVictoryScreen() {
-        g2.setColor(new Color(0, 0, 0, 200));
+        // Full black screen
+        g2.setColor(Color.black);
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
         
         int x;
         int y;
         String text;
         
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 80f));
-        text = "VICTORY!";
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 70f));
+        text = "You beat the game!";
         g2.setColor(Color.yellow);
         x = getXforCenteredText(text);
         y = gp.tileSize * 3;
         g2.drawString(text, x, y);
         
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 40f));
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 30f));
         g2.setColor(Color.white);
         
-        text = "You and your friends escaped!";
-        x = getXforCenteredText(text);
+        String[] lines = {
+            "Brian's fat ass was killed and you freed",
+            "your friends now time to find a boat",
+            "and get the fuck outta here!"
+        };
         y += gp.tileSize * 2;
-        g2.drawString(text, x, y);
+        for(String line : lines) {
+            x = getXforCenteredText(line);
+            g2.drawString(line, x, y);
+            y += gp.tileSize;
+        }
         
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 30f));
-        
-        text = "Enemies Defeated: " + (gp.player.exp / 5);
-        x = getXforCenteredText(text);
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 26f));
+        String[] lines2 = {
+            "Thanks for wasting your time on",
+            "this crappy game!"
+        };
         y += gp.tileSize;
-        g2.drawString(text, x, y);
+        for(String line : lines2) {
+            x = getXforCenteredText(line);
+            g2.drawString(line, x, y);
+            y += gp.tileSize;
+        }
         
-        text = "Final Level: " + gp.player.level;
-        x = getXforCenteredText(text);
-        y += gp.tileSize;
-        g2.drawString(text, x, y);
-        
-        text = "$FartCoins: " + gp.player.$fartcoin;
-        x = getXforCenteredText(text);
-        y += gp.tileSize;
-        g2.drawString(text, x, y);
-        
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 25f));
-        text = "Thanks for playing Box Boy!";
-        x = getXforCenteredText(text);
-        y += gp.tileSize * 2;
-        g2.drawString(text, x, y);
-        
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 22f));
+        g2.setColor(Color.gray);
         text = "Press ENTER to return to title";
         x = getXforCenteredText(text);
         y += gp.tileSize;
@@ -1025,5 +1068,28 @@ public class UI {
         int length = (int)g2.getFontMetrics().getStringBounds(text, g2).getWidth();
         int x = tailX - length;
         return x;
+    }
+
+    public void startBrianCutscene(entity.Entity brian) {
+        brianCutsceneActive = true;
+        cutsceneIndex = 0;
+        cutsceneMonster = brian;
+        currentDialouge = brianCutscene[0];
+        gp.gameState = gp.dialougeState;
+    }
+    
+    public void advanceBrianCutscene() {
+        cutsceneIndex++;
+        if(cutsceneIndex < brianCutscene.length) {
+            // Show the next line of the cutscene
+            currentDialouge = brianCutscene[cutsceneIndex];
+        }
+        else {
+            // Cutscene over - Theo ends him. Brian dies and the game is beaten.
+            brianCutsceneActive = false;
+            cutsceneMonster.dying = true;
+            cutsceneMonster = null;
+            gp.gameState = gp.victoryState;
+        }
     }
 }

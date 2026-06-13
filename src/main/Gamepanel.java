@@ -67,6 +67,9 @@ public class Gamepanel extends JPanel implements Runnable {
     public ArrayList<Entity> projectileList = new ArrayList<>();
     ArrayList<Entity> entityList = new ArrayList<>();
 
+    // Current NPC being talked to
+    public int currentNPC = 999;
+
     // GAME STATES
     public int gameState;
     public final int titleState = 0;
@@ -296,5 +299,35 @@ public class Gamepanel extends JPanel implements Runnable {
     public void playSE(int i) {
         se.setFile(i);
         se.play();
+    }
+
+    // Helper methods for camera bounds clamping
+    // Prevents black areas from showing at map edges
+    public int getCameraX() {
+        int cameraX = player.worldX - player.screenX;
+
+        // Clamp to map boundaries
+        if (cameraX < 0) {
+            cameraX = 0;
+        }
+        if (cameraX > worldWidth - screenWidth) {
+            cameraX = worldWidth - screenWidth;
+        }
+
+        return cameraX;
+    }
+
+    public int getCameraY() {
+        int cameraY = player.worldY - player.screenY;
+
+        // Clamp to map boundaries
+        if (cameraY < 0) {
+            cameraY = 0;
+        }
+        if (cameraY > worldHeight - screenHeight) {
+            cameraY = worldHeight - screenHeight;
+        }
+
+        return cameraY;
     }
 }

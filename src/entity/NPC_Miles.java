@@ -90,6 +90,11 @@ public class NPC_Miles extends Entity{
 	public void speak() {
 		gp.ui.currentDialouge = dialouges[0];
 		super.speak();
+
+		// Check if all dialogues are complete and Liam quest is done
+		if(dialogueComplete && gp.quest.foundLiam && !gp.quest.foundMiles) {
+			gp.quest.completeFoundMiles();
+		}
 	}
 }
 

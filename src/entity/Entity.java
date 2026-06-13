@@ -40,6 +40,7 @@ public class Entity {
 	public int shotAvailableCounter = 0;
 	String dialouges[] = new String[20];
 	int dialougeIndex = 0;
+	public boolean dialogueComplete = false; // Track if all dialogues have been shown
 	public BufferedImage image, image2, image3;
 	public String name;
 	public boolean collision = false;
@@ -103,14 +104,18 @@ public class Entity {
 	public void setAction() {}
 	public void damageReaction() {}
 	public void speak() {
-		
+
 		if(dialouges[dialougeIndex] == null) {
 			dialougeIndex = 0;
+			dialogueComplete = true; // Reached the end of dialogues
+			gp.currentNPC = 999; // Reset current NPC
+			gp.gameState = gp.playState; // Exit dialogue state
 		}
-		gp.ui.currentDialouge = dialouges[dialougeIndex];
-				dialougeIndex++;
-				
-				switch(gp.player.direction) {
+		else {
+			gp.ui.currentDialouge = dialouges[dialougeIndex];
+			dialougeIndex++;
+
+			switch(gp.player.direction) {
 				case"up":
 					direction = "down";
 					break;
@@ -123,7 +128,8 @@ public class Entity {
 				case "right":
 					direction = "left";
 					break;
-				}
+			}
+		}
 	}
 	public void use(Entity entity) {}
 	public void checkDrop() {}
@@ -214,14 +220,17 @@ public class Entity {
 	}
 	public void draw(Graphics2D g2) {
 		BufferedImage image = null;
-		
-		int screenX = worldX - gp.player.worldX + gp.player.screenX;
-		int screenY = worldY - gp.player.worldY + gp.player.screenY;
-		
-		if(worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-				worldX - gp.tileSize < gp.player.worldX + gp.player.screenX&&
-				worldY + gp.tileSize> gp.player.worldY - gp.player.screenY&&
-				worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
+
+		// Use clamped camera position to prevent entities from moving off-screen at map edges
+		int cameraX = gp.getCameraX();
+		int cameraY = gp.getCameraY();
+		int screenX = worldX - cameraX;
+		int screenY = worldY - cameraY;
+
+		if(worldX + gp.tileSize > cameraX &&
+				worldX - gp.tileSize < cameraX + gp.screenWidth &&
+				worldY + gp.tileSize > cameraY &&
+				worldY - gp.tileSize < cameraY + gp.screenHeight) {
 			switch (direction) {
 		    case "up":
 		        if (spriteNum == 1) {

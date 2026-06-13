@@ -91,5 +91,10 @@ public class NPC_Liam extends Entity {
 	public void speak() {
 		gp.ui.currentDialouge = dialouges[0];
 		super.speak();
+
+		// Check if all dialogues are complete and Ian quest is done
+		if(dialogueComplete && gp.quest.foundIan && !gp.quest.foundLiam) {
+			gp.quest.completeFoundLiam();
+		}
 	}
 }

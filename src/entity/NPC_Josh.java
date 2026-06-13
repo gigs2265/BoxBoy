@@ -58,6 +58,11 @@ public class NPC_Josh extends Entity {
 		inventory.add(new OBJ_Jimmysass(gp));
 		inventory.add(new OBJ_Spicyburger(gp));
 		inventory.add(new OBJ_Dildo_Sword(gp));
+		
+		// Keys for sale - used to unlock the cell doors holding the captured characters
+		object.OBJ_Key key = new object.OBJ_Key(gp);
+		key.price = 10;
+		inventory.add(key);
 	}
 
 	public void setAction() {

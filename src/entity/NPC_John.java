@@ -84,6 +84,11 @@ public class NPC_John extends Entity {
 	public void speak() {
 		gp.ui.currentDialouge = dialouges[0];
 		super.speak();
+
+		// Complete John quest when all dialogues are done and all friends are found
+		if(dialogueComplete && gp.quest.foundAllFriends && !gp.quest.foundJohn) {
+			gp.quest.completeFoundJohn();
+		}
 	}
 }
 

@@ -6,6 +6,7 @@ import java.awt.event.KeyListener;
 public class KeyHandler implements KeyListener {
     Gamepanel gp;
     public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed, shotKeyPressed;
+    boolean enterKeyHeld = false; // tracks if ENTER is physically held down, so the attack only fires once per press
     
     boolean showDebugText = false;
     public boolean escapePressed;
@@ -113,7 +114,12 @@ public class KeyHandler implements KeyListener {
             gp.gameState = gp.characterState;
         }
         if (code == KeyEvent.VK_ENTER) {
-            enterPressed = true;
+            // Only count a FRESH press - holding the key won't keep re-triggering attacks.
+            // You have to release ENTER and press it again to attack again.
+            if(enterKeyHeld == false) {
+                enterPressed = true;
+                enterKeyHeld = true;
+            }
         }
         if (code == KeyEvent.VK_E) {
             shotKeyPressed = true;
@@ -146,7 +152,17 @@ public class KeyHandler implements KeyListener {
     
     public void dialogueState(int code) {
         if (code == KeyEvent.VK_ENTER) {
-            gp.gameState = gp.playState;
+            if(gp.ui.brianCutsceneActive) {
+                gp.ui.advanceBrianCutscene();
+            }
+            else if(gp.currentNPC != 999) {
+                // Continue dialogue with current NPC
+                gp.npc[gp.currentMap][gp.currentNPC].speak();
+            }
+            else {
+                // No NPC talking, return to play state
+                gp.gameState = gp.playState;
+            }
         }
     }
     
@@ -368,6 +384,7 @@ public class KeyHandler implements KeyListener {
 
         if (code == KeyEvent.VK_ENTER) {
             enterPressed = false;
+            enterKeyHeld = false;
         }
     }
 }

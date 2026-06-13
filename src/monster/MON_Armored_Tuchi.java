@@ -7,6 +7,7 @@ import main.Gamepanel;
 public class MON_Armored_Tuchi extends Entity {
 	
 	Gamepanel gp;
+	public boolean dropsKey = false; // set true on one specific tuchi to make it drop a key
 	
 	public MON_Armored_Tuchi(Gamepanel gp) {
 		super(gp);
@@ -116,6 +117,12 @@ public class MON_Armored_Tuchi extends Entity {
 			} else {
 				direction = "up";
 			}
+		}
+	}
+
+	public void checkDrop() {
+		if(dropsKey == true) {
+			dropItem(new object.OBJ_Key(gp));
 		}
 	}
 }

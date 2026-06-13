@@ -50,8 +50,8 @@ public class EventHandler {
         if(canTouchEvent == true) {
             if(hit(0, 28, 31, "up") == true) {damagePit(28);}
             else if(hit(0, 13, 23, "any") == true) {damagePit(13);}
-            else if(hit(0, 48, 5, "any") == true) {teleport(1, 25, 26);}  // FIXED: Spawn at entrance corridor
-            else if(hit(1, 28, 44, "any") == true) {teleport(0, 48, 5);}  // FIXED: Exit stairs position
+            else if(hit(0, 48, 5, "any") == true) {teleport(1, 5, 47);}  // Enter dungeon: spawn in the small entrance hallway
+            else if(hit(1, 2, 47, "any") == true) {teleport(0, 47, 5);}  // Exit dungeon via stairs (spawn next to overworld stairs, not on them)
         }
     }
     

@@ -12,6 +12,8 @@ import main.KeyHandler;
 import object.OBJ_Bloat;
 import object.OBJ_Chest;
 import object.OBJ_Door;
+import object.OBJ_MilesDoor;
+import object.OBJ_VicDoor;
 import object.OBJ_Key;
 import object.OBJ_Milkshot;
 import object.OBJ_Spray_Normal;
@@ -199,10 +201,15 @@ public class Player extends Entity {
 
             keyH.enterPressed = false;
 
-            spriteCounter++;
-            if (spriteCounter > 12) {
-                spriteNum = (spriteNum == 1) ? 2 : 1;
-                spriteCounter = 0;
+            // Don't touch spriteCounter while an attack is playing - the attack
+            // animation uses the same counter to know when to end. If the walk
+            // animation keeps resetting it, the attack repeats forever.
+            if (attacking == false) {
+                spriteCounter++;
+                if (spriteCounter > 12) {
+                    spriteNum = (spriteNum == 1) ? 2 : 1;
+                    spriteCounter = 0;
+                }
             }
         }
         
@@ -289,7 +296,7 @@ public class Player extends Entity {
     public void pickUpObject(int i) {
         if (i != 999) {
             String objectName = gp.obj[gp.currentMap][i].name;
-            
+
             if(objectName.equals("Door")) {
                 OBJ_Door door = (OBJ_Door)gp.obj[gp.currentMap][i];
                 if(searchItemInInventory("Key") != 999) {
@@ -297,6 +304,28 @@ public class Player extends Entity {
                     gp.obj[gp.currentMap][i] = null;
                 } else {
                     door.interact();
+                }
+            }
+            else if(objectName.equals("Vic's Door")) {
+                OBJ_VicDoor vicDoor = (OBJ_VicDoor)gp.obj[gp.currentMap][i];
+                if(searchItemInInventory("Key") != 999 && gp.quest.talkedToVic) {
+                    // Only unlock and remove door if talked to Vic AND player has key
+                    vicDoor.use(this);
+                    gp.obj[gp.currentMap][i] = null;
+                } else {
+                    // Show appropriate message based on quest status
+                    vicDoor.interact();
+                }
+            }
+            else if(objectName.equals("Miles' Door")) {
+                OBJ_MilesDoor milesDoor = (OBJ_MilesDoor)gp.obj[gp.currentMap][i];
+                if(searchItemInInventory("Key") != 999 && gp.quest.canUnlockMilesDoor()) {
+                    // Only unlock and remove door if quest is complete AND player has key
+                    milesDoor.use(this);
+                    gp.obj[gp.currentMap][i] = null;
+                } else {
+                    // Show appropriate message based on quest status
+                    milesDoor.interact();
                 }
             }
             else if(objectName.equals("Chest")) {
@@ -339,9 +368,15 @@ public class Player extends Entity {
         if (keyH.enterPressed) {
             if (i != 999) {
                 gp.gameState = gp.dialougeState;
+                gp.currentNPC = i; // Store which NPC we're talking to
                 gp.npc[gp.currentMap][i].speak();
             } else {
-                gp.playSE(6);
+                // Play different attack sound based on weapon type
+                if (currentWepon.type == type_ass) {
+                    gp.playSE(16); // Fart blast sound for Jimmy's Ass
+                } else {
+                    gp.playSE(6); // Spray sound for other weapons
+                }
                 attacking = true;
             }
             keyH.enterPressed = false;
@@ -373,11 +408,28 @@ public class Player extends Entity {
                 gp.monster[gp.currentMap][i].damageReaction();
                 
                 if(gp.monster[gp.currentMap][i].life <= 0) {
-                    gp.monster[gp.currentMap][i].dying = true;
-                    gp.ui.addMessage("You killed " + gp.monster[gp.currentMap][i].name + "!");
-                    gp.ui.addMessage("Exp +" + gp.monster[gp.currentMap][i].exp);
-                    exp += gp.monster[gp.currentMap][i].exp;
-                    checkLevelUp();
+                    String monsterName = gp.monster[gp.currentMap][i].name;
+
+                    if(monsterName.equals("Brian")) {
+                        // BOSS CUTSCENE - Brian is too weak to fight, talks before dying
+                        gp.ui.startBrianCutscene(gp.monster[gp.currentMap][i]);
+                        // Complete Brian quest
+                        if(!gp.quest.defeatedBrian) {
+                            gp.quest.completeDefeatedBrian();
+                        }
+                    }
+                    else {
+                        gp.monster[gp.currentMap][i].dying = true;
+                        gp.ui.addMessage("You killed " + monsterName + "!");
+                        gp.ui.addMessage("Exp +" + gp.monster[gp.currentMap][i].exp);
+                        exp += gp.monster[gp.currentMap][i].exp;
+                        checkLevelUp();
+
+                        // Complete Nick quest
+                        if(monsterName.equals("Nick") && !gp.quest.defeatedNick) {
+                            gp.quest.completeDefeatedNick();
+                        }
+                    }
                 }
             }
         }
@@ -423,8 +475,12 @@ public class Player extends Entity {
     
     public void draw(Graphics2D g2) {
         BufferedImage image = null;
-        int tempScreenX = screenX;
-        int tempScreenY = screenY;
+
+        // Adjust player screen position when camera is clamped at map edges
+        int cameraX = gp.getCameraX();
+        int cameraY = gp.getCameraY();
+        int tempScreenX = worldX - cameraX;
+        int tempScreenY = worldY - cameraY;
 
         switch (direction) {
             case "up":

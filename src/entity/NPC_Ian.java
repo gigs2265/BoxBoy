@@ -117,6 +117,11 @@ public class NPC_Ian extends Entity {
 		//does charater stuff
 		gp.ui.currentDialouge = dialouges[0];
 		super.speak();
+
+		// Check if all dialogues are complete and Mike quest is done
+		if(dialogueComplete && gp.quest.foundMike && !gp.quest.foundIan) {
+			gp.quest.completeFoundIan();
+		}
 	}
 }
 

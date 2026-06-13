@@ -16,6 +16,8 @@ import object.OBJ_Beer;
 import object.OBJ_Boxcutter;
 import object.OBJ_Chest;
 import object.OBJ_Door;
+import object.OBJ_MilesDoor;
+import object.OBJ_VicDoor;
 import object.OBJ_Fart_Coin;
 import object.OBJ_Jimmysass;
 import object.OBJ_Key;
@@ -73,12 +75,14 @@ public class AssetSetter {
 		gp.obj[mapNum][i].worldY = gp.tileSize * 8;
 		i++;
 		
-		gp.obj[mapNum][i] = new OBJ_Door(gp);
+		// VIC'S DOOR - Special quest-locked door (unlocks after talking to Vic)
+		gp.obj[mapNum][i] = new OBJ_VicDoor(gp);
 		gp.obj[mapNum][i].worldX = gp.tileSize * 23;
 		gp.obj[mapNum][i].worldY = gp.tileSize * 32;
 		i++;
 		
-		gp.obj[mapNum][i] = new OBJ_Door(gp);
+		// MILES' DOOR - Special quest-locked door
+		gp.obj[mapNum][i] = new OBJ_MilesDoor(gp);
 		gp.obj[mapNum][i].worldX = gp.tileSize * 38;
 		gp.obj[mapNum][i].worldY = gp.tileSize * 12;
 		i++;
@@ -182,49 +186,50 @@ public class AssetSetter {
 		mapNum = 1;
 		i = 0;
 		
-		// Keys
-		gp.obj[mapNum][i] = new OBJ_Key(gp);
-		gp.obj[mapNum][i].worldX = gp.tileSize * 39;
-		gp.obj[mapNum][i].worldY = gp.tileSize * 18;
-		i++;
+		// LOCKED CELL DOORS along the entrance hallway (one per imprisoned character)
+		int[] cellDoorCols = {5, 11, 17, 23, 29, 35};
+		for(int c = 0; c < cellDoorCols.length; c++) {
+			gp.obj[mapNum][i] = new OBJ_Door(gp);
+			gp.obj[mapNum][i].worldX = gp.tileSize * cellDoorCols[c];
+			gp.obj[mapNum][i].worldY = gp.tileSize * 44;
+			i++;
+		}
 		
-		gp.obj[mapNum][i] = new OBJ_Key(gp);
-		gp.obj[mapNum][i].worldX = gp.tileSize * 32;
-		gp.obj[mapNum][i].worldY = gp.tileSize * 38;
-		i++;
-		
-		// Chests
+		// CHEST in the armored tuchi room - holds the key for the locked door
 		OBJ_Chest chest5 = new OBJ_Chest(gp);
-		chest5.worldX = gp.tileSize * 27;
-		chest5.worldY = gp.tileSize * 30;
+		chest5.worldX = gp.tileSize * 44;
+		chest5.worldY = gp.tileSize * 28;
+		chest5.setLoot(new OBJ_Key(gp));
 		chest5.setLoot(new OBJ_Beer(gp));
 		gp.obj[mapNum][i] = chest5;
 		i++;
 		
-		OBJ_Chest chest4 = new OBJ_Chest(gp);
-		chest4.worldX = gp.tileSize * 40;
-		chest4.worldY = gp.tileSize * 37;
-		chest4.setLoot(new OBJ_Jimmysass(gp));
-		gp.obj[mapNum][i] = chest4;
+		// LOCKED DOOR on the far side of the armored tuchi room -> bigger hallway
+		gp.obj[mapNum][i] = new OBJ_Door(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize * 32;
+		gp.obj[mapNum][i].worldY = gp.tileSize * 30;
 		i++;
 		
-		OBJ_Chest chest6 = new OBJ_Chest(gp);
-		chest6.worldX = gp.tileSize * 43;
-		chest6.worldY = gp.tileSize * 4;
-		chest6.setLoot(new OBJ_Jimmysass(gp));
-		chest6.setLoot(new OBJ_Fart_Coin(gp));
-		chest6.setLoot(new OBJ_Beer(gp));
-		gp.obj[mapNum][i] = chest6;
+		// LOCKED DOOR to the boss area (opened with the key Nick drops)
+		gp.obj[mapNum][i] = new OBJ_Door(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize * 9;
+		gp.obj[mapNum][i].worldY = gp.tileSize * 21;
 		i++;
 		
+		// Pickups
 		gp.obj[mapNum][i] = new OBJ_Fart_Coin(gp);
-		gp.obj[mapNum][i].worldX = gp.tileSize * 22;
-		gp.obj[mapNum][i].worldY = gp.tileSize * 7;
+		gp.obj[mapNum][i].worldX = gp.tileSize * 36;
+		gp.obj[mapNum][i].worldY = gp.tileSize * 33;
 		i++;
 		
 		gp.obj[mapNum][i] = new OBJ_Beer(gp);
-		gp.obj[mapNum][i].worldX = gp.tileSize * 31;
-		gp.obj[mapNum][i].worldY = gp.tileSize * 7;
+		gp.obj[mapNum][i].worldX = gp.tileSize * 25;
+		gp.obj[mapNum][i].worldY = gp.tileSize * 30;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Beer(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize * 12;
+		gp.obj[mapNum][i].worldY = gp.tileSize * 32;
 		i++;
 	}
 	
@@ -260,14 +265,16 @@ public class AssetSetter {
 		mapNum = 1;
 		i = 0;
 		
+		// JOHN - locked in the first cell along the entrance hallway
 		gp.npc[mapNum][i] = new NPC_John(gp);
-		gp.npc[mapNum][i].worldX = gp.tileSize * 10;
-		gp.npc[mapNum][i].worldY = gp.tileSize * 5;
+		gp.npc[mapNum][i].worldX = gp.tileSize * 5;
+		gp.npc[mapNum][i].worldY = gp.tileSize * 41;
 		i++;
 		
+		// JOSH the merchant - at the end of the hallway, in the armored tuchi room
 		gp.npc[mapNum][i] = new NPC_Josh(gp);
-		gp.npc[mapNum][i].worldX = gp.tileSize * 43;
-		gp.npc[mapNum][i].worldY = gp.tileSize * 9;
+		gp.npc[mapNum][i].worldX = gp.tileSize * 42;
+		gp.npc[mapNum][i].worldY = gp.tileSize * 34;
 		i++;
 	}
 	
@@ -374,24 +381,41 @@ public class AssetSetter {
 		mapNum = 1;
 		i = 0;
 		
+		// ARMORED TUCHIS guarding the open room at the end of the entrance hallway
+		// This first one drops a key when killed
+		MON_Armored_Tuchi keyTuchi = new MON_Armored_Tuchi(gp);
+		keyTuchi.dropsKey = true;
+		keyTuchi.worldX = gp.tileSize * 36;
+		keyTuchi.worldY = gp.tileSize * 28;
+		gp.monster[mapNum][i] = keyTuchi;
+		i++;
+		
+		gp.monster[mapNum][i] = new MON_Armored_Tuchi(gp);
+		gp.monster[mapNum][i].worldX = gp.tileSize * 40;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 31;
+		i++;
+		
+		gp.monster[mapNum][i] = new MON_Armored_Tuchi(gp);
+		gp.monster[mapNum][i].worldX = gp.tileSize * 44;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 33;
+		i++;
+		
+		// TUCHI in the bigger hallway behind the locked door
+		gp.monster[mapNum][i] = new MON_Tuchi(gp);
+		gp.monster[mapNum][i].worldX = gp.tileSize * 24;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 30;
+		i++;
+		
+		// NICK - mini-boss in the medium room, drops the key to the boss area
 		gp.monster[mapNum][i] = new MON_Nick(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 11;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 34;
+		gp.monster[mapNum][i].worldX = gp.tileSize * 9;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 29;
 		i++;
 		
-		gp.monster[mapNum][i] = new MON_Armored_Tuchi(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 33;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 40;
-		i++;
-		
-		gp.monster[mapNum][i] = new MON_Armored_Tuchi(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 43;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 38;
-		i++;
-		
+		// BRIAN - final boss in the large arena
 		gp.monster[mapNum][i] = new MON_Brian(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 15;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 43;
+		gp.monster[mapNum][i].worldX = gp.tileSize * 22;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 8;
 		i++;
 	}
 }

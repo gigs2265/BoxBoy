@@ -78,6 +78,11 @@ public class NPC_Mike extends Entity{
 	public void speak() {
 		gp.ui.currentDialouge = dialouges[0];
 		super.speak();
+
+		// Mike only has 1 dialogue, so complete after first talk if Vic quest is done
+		if(gp.quest.talkedToVic && !gp.quest.foundMike) {
+			gp.quest.completeFoundMike();
+		}
 	}
 }
 

@@ -22,10 +22,13 @@ public class MON_Brian extends Entity {
 		exp = 40;
 		projectile = new OBJ_Titmilk(gp);
 		
-		solidArea.x = 3;
-		solidArea.y = 18;
-		solidArea.width = 90;
-		solidArea.height = 66;
+		// Brian's sprite is 4 tiles (192px) - his collision box needs to cover
+		// almost the whole sprite so he can't visually overlap walls and so
+		// the player's attacks can actually reach him.
+		solidArea.x = 16;
+		solidArea.y = 24;
+		solidArea.width = 160;
+		solidArea.height = 160;
 		solidAreaDefaultX = solidArea.x;
 		solidAreaDefaultY = solidArea.y;
 		

@@ -185,4 +185,9 @@ public class MON_Nick extends Entity {
 			}
 		}
 	}
+
+	public void checkDrop() {
+		// Nick drops the key that opens the door to the boss area
+		dropItem(new object.OBJ_Key(gp));
+	}
 }
