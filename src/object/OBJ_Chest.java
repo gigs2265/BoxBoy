@@ -5,7 +5,7 @@ import main.Gamepanel;
 
 public class OBJ_Chest extends Entity {
 	
-	boolean opened = false;
+	public boolean opened = false;
 	Gamepanel gamePanel;
 	
 	public OBJ_Chest(Gamepanel gp) {

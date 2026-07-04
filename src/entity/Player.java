@@ -215,6 +215,10 @@ public class Player extends Entity {
         
         if(gp.keyH.shotKeyPressed == true && projectile.alive == false && 
            shotAvailableCounter == 30 && projectile.haveResource(this) == true) {
+            // Projectile damage scales with strength as you level up,
+            // just like the melee attack (strength goes up 1 per level).
+            // Level 1: 4 damage (same as before), then +2 per level.
+            projectile.attack = 2 + (2 * strength);
             projectile.set(worldX, worldY, direction, true, this);
             projectile.subtractResource(this);
             gp.projectileList.add(projectile);
@@ -398,10 +402,23 @@ public class Player extends Entity {
     public void damageMonster(int i, int attack) {
         if(i != 999) {
             if(gp.monster[gp.currentMap][i].invincible == false) {
-                gp.playSE(7);
                 int damage = attack - gp.monster[gp.currentMap][i].defense;
                 if(damage < 0) {
                     damage = 0;
+                }
+                
+                // Pick exactly ONE sound for this hit:
+                // - killing blow on Brian -> his death sound (instead of the hit sound)
+                // - any other hit on Brian -> his custom hit sound
+                // - everyone else -> the normal hit sound
+                boolean isBrian = gp.monster[gp.currentMap][i].name.equals("Brian");
+                boolean killingBlow = (gp.monster[gp.currentMap][i].life - damage <= 0);
+                if(isBrian && killingBlow) {
+                    gp.playSE(18);
+                } else if(isBrian) {
+                    gp.playSE(17);
+                } else {
+                    gp.playSE(7);
                 }
                 gp.monster[gp.currentMap][i].life -= damage;
                 gp.monster[gp.currentMap][i].invincible = true;
@@ -411,8 +428,9 @@ public class Player extends Entity {
                     String monsterName = gp.monster[gp.currentMap][i].name;
 
                     if(monsterName.equals("Brian")) {
+                        // (death sound already played above, replacing the hit sound)
                         // BOSS CUTSCENE - Brian is too weak to fight, talks before dying
-                        gp.ui.startBrianCutscene(gp.monster[gp.currentMap][i]);
+                        gp.ui.startCutscene(gp.ui.brianCutscene, gp.ui.CUTSCENE_BRIAN_DEATH, gp.monster[gp.currentMap][i]);
                         // Complete Brian quest
                         if(!gp.quest.defeatedBrian) {
                             gp.quest.completeDefeatedBrian();

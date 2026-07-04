@@ -85,7 +85,18 @@ public class KeyHandler implements KeyListener {
             }
             
             if (gp.ui.commandNum == 1) {
-                // Load game functionality
+                // LOAD GAME
+                if(gp.saveLoad.load() == true) {
+                    gp.gameState = gp.playState;
+                    gp.stopMusic();
+                    if(gp.currentMap == 1) {
+                        gp.playMusic(15); // dungeon music
+                    } else {
+                        gp.playMusic(0);  // island music
+                    }
+                    enterPressed = false;
+                }
+                // If there's no save file, nothing happens and we stay on the title
             }
             
             if(gp.ui.commandNum == 2) {
@@ -152,8 +163,8 @@ public class KeyHandler implements KeyListener {
     
     public void dialogueState(int code) {
         if (code == KeyEvent.VK_ENTER) {
-            if(gp.ui.brianCutsceneActive) {
-                gp.ui.advanceBrianCutscene();
+            if(gp.ui.cutsceneActive) {
+                gp.ui.advanceCutscene();
             }
             else if(gp.currentNPC != 999) {
                 // Continue dialogue with current NPC
@@ -188,7 +199,7 @@ public class KeyHandler implements KeyListener {
         
         int maxCommandNum = 0;
         switch(gp.ui.subState) {
-            case 0: maxCommandNum = 5; break;
+            case 0: maxCommandNum = 6; break;
             case 3: maxCommandNum = 1; break;
         }
         

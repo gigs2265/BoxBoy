@@ -69,7 +69,7 @@ public class AssetSetter {
 		
 	
 		
-		// DOORS ON OVERWORLD STRUCTURES (adjust positions based on your structures)
+		// DOORS ON OVERWORLD STRUCTURES 
 		gp.obj[mapNum][i] = new OBJ_Door(gp);
 		gp.obj[mapNum][i].worldX = gp.tileSize * 16;
 		gp.obj[mapNum][i].worldY = gp.tileSize * 8;
@@ -186,7 +186,7 @@ public class AssetSetter {
 		mapNum = 1;
 		i = 0;
 		
-		// LOCKED CELL DOORS along the entrance hallway (one per imprisoned character)
+		// LOCKED CELL DOORS along the entrance hallway 
 		int[] cellDoorCols = {5, 11, 17, 23, 29, 35};
 		for(int c = 0; c < cellDoorCols.length; c++) {
 			gp.obj[mapNum][i] = new OBJ_Door(gp);

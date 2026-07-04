@@ -10,6 +10,7 @@ public class Quest {
     public boolean foundAllFriends = false;
     public boolean foundJohn = false;
     public boolean defeatedNick = false;
+    public boolean metNick = false; // Nick intro cutscene already played
     public boolean defeatedBrian = false;
 
     // Friend-finding sub-quests (overworld)
@@ -121,8 +122,8 @@ public class Quest {
             defeatedBrian = true;
             gp.ui.addMessage("Quest Complete: Defeated Brian!");
             gp.ui.addMessage("You can now escape the island!");
-            // Trigger victory
-            gp.gameState = gp.victoryState;
+            // NOTE: do NOT set gameState here! The defeat cutscene is showing
+            // right now, and it triggers the victory screen itself when it ends.
         }
     }
 

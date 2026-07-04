@@ -52,6 +52,10 @@ public class EventHandler {
             else if(hit(0, 13, 23, "any") == true) {damagePit(13);}
             else if(hit(0, 48, 5, "any") == true) {teleport(1, 5, 47);}  // Enter dungeon: spawn in the small entrance hallway
             else if(hit(1, 2, 47, "any") == true) {teleport(0, 47, 5);}  // Exit dungeon via stairs (spawn next to overworld stairs, not on them)
+            // NICK INTRO CUTSCENE - fires once when entering Nick's room (3-tile-wide opening)
+            else if(hit(1, 14, 29, "any") == true) {nickIntro();}
+            else if(hit(1, 14, 30, "any") == true) {nickIntro();}
+            else if(hit(1, 14, 31, "any") == true) {nickIntro();}
         }
     }
     
@@ -98,6 +102,18 @@ public class EventHandler {
         canTouchEvent = false;
         gp.playSE(14);
         gp.stopMusic();
-        gp.playMusic(15);
+        // Play the right music for wherever we're going
+        if(map == 1) {
+            gp.playMusic(15); // dungeon music
+        } else {
+            gp.playMusic(0);  // island music
+        }
+    }
+    
+    public void nickIntro() {
+        if(gp.quest.metNick == false && gp.quest.defeatedNick == false) {
+            gp.quest.metNick = true;
+            gp.ui.startCutscene(gp.ui.nickCutscene, gp.ui.CUTSCENE_NICK_INTRO, null);
+        }
     }
 }

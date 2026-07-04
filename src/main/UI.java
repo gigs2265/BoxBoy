@@ -28,10 +28,26 @@ public class UI {
     public boolean gameFinshed = false;
     public String currentDialouge = "";
     
-    // BRIAN DEFEAT CUTSCENE
-    public boolean brianCutsceneActive = false;
+    // CUTSCENE SYSTEM
+    // A cutscene is a sequence of dialogue boxes advanced with ENTER.
+    // cutsceneType decides what happens when the last line finishes.
+    public final int CUTSCENE_BRIAN_DEATH = 1;
+    public final int CUTSCENE_NICK_INTRO = 2;
+    public boolean cutsceneActive = false;
+    public int cutsceneType = 0;
+    public String[] cutsceneLines;
     public int cutsceneIndex = 0;
     entity.Entity cutsceneMonster;
+    
+    public String[] nickCutscene = {
+        "Theo: Holy shit! Nick is that \nyou?!?!",
+        "Nick: RAWRRRRR!!!! I NEED TO FUCK \nJIMMY'S FAT SEXY ASS",
+        "Theo: ...Fuck, that is Nick. I don't \nknow if this is the beers talking \nbut I think he's too far gone.",
+        "Theo: I don't think I can bring \nmyself to kill him.",
+        "Nick: GRRRRR... Head. Square. \nTits. ROUND!!!!!",
+        "Theo: Never mind... Time to \nWHOOP SOME ASS!"
+    };
+    
     public String[] brianCutscene = {
         "Brian collapses, too weak to \nfight any longer...",
         "Theo: Before I end this... \nanswer me one thing.",
@@ -487,8 +503,20 @@ public class UI {
         }
         
         textY += gp.tileSize;
-        g2.drawString("Fuck Off", textX, textY);
+        g2.drawString("Save Game", textX, textY);
         if(commandNum == 4) {
+            g2.drawString(">", textX-25, textY);
+            if(gp.keyH.enterPressed == true) {
+                gp.saveLoad.save();
+                currentDialouge = "Game saved!";
+                gp.gameState = gp.dialougeState;
+                commandNum = 0;
+            }
+        }
+        
+        textY += gp.tileSize;
+        g2.drawString("Fuck Off", textX, textY);
+        if(commandNum == 5) {
             g2.drawString(">", textX-25, textY);
             if(gp.keyH.enterPressed == true) {
                 subState = 3;
@@ -498,7 +526,7 @@ public class UI {
         
         textY += gp.tileSize*2;
         g2.drawString("Back", textX, textY);
-        if(commandNum == 5) {
+        if(commandNum == 6) {
             g2.drawString(">", textX-25, textY);
             if(gp.keyH.enterPressed == true) {
                 gp.gameState = gp.playState;
@@ -1070,26 +1098,37 @@ public class UI {
         return x;
     }
 
-    public void startBrianCutscene(entity.Entity brian) {
-        brianCutsceneActive = true;
+    public void startCutscene(String[] lines, int type, entity.Entity monster) {
+        cutsceneActive = true;
+        cutsceneType = type;
+        cutsceneLines = lines;
         cutsceneIndex = 0;
-        cutsceneMonster = brian;
-        currentDialouge = brianCutscene[0];
+        cutsceneMonster = monster;
+        currentDialouge = cutsceneLines[0];
         gp.gameState = gp.dialougeState;
     }
     
-    public void advanceBrianCutscene() {
+    public void advanceCutscene() {
         cutsceneIndex++;
-        if(cutsceneIndex < brianCutscene.length) {
+        if(cutsceneIndex < cutsceneLines.length) {
             // Show the next line of the cutscene
-            currentDialouge = brianCutscene[cutsceneIndex];
+            currentDialouge = cutsceneLines[cutsceneIndex];
         }
         else {
-            // Cutscene over - Theo ends him. Brian dies and the game is beaten.
-            brianCutsceneActive = false;
-            cutsceneMonster.dying = true;
+            // Last line finished - do whatever this cutscene type ends with
+            cutsceneActive = false;
+            
+            if(cutsceneType == CUTSCENE_BRIAN_DEATH) {
+                // Theo ends him. Brian dies and the game is beaten.
+                cutsceneMonster.dying = true;
+                gp.gameState = gp.victoryState;
+            }
+            else {
+                // Default: back to gameplay (Nick intro, etc.)
+                gp.gameState = gp.playState;
+            }
             cutsceneMonster = null;
-            gp.gameState = gp.victoryState;
+            cutsceneType = 0;
         }
     }
 }

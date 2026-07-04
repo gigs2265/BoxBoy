@@ -33,6 +33,8 @@ public class Sound {
 		soundURL[14] = getClass().getResource("/sound/transistion.wav");
 		soundURL[15] = getClass().getResource("/sound/the boss level.wav");
 		soundURL[16] = getClass().getResource("/sound/fartblast.wav");
+		soundURL[17] = getClass().getResource("/sound/brianhit.wav");   // Brian takes a hit
+		soundURL[18] = getClass().getResource("/sound/briandies.wav");  // Brian dies
 	}
 	public void setFile(int i) {
 		try {
@@ -50,16 +52,21 @@ public class Sound {
 		
 	}
 public void play() {
-	clip.start();
-	
+	// Null check: clip is null until setFile() has been called at least once
+	// (e.g. loading a save from the title screen before any music has played)
+	if(clip != null) {
+		clip.start();
+	}
 }
 public void loop () {
-	clip.loop(Clip.LOOP_CONTINUOUSLY);
-	
+	if(clip != null) {
+		clip.loop(Clip.LOOP_CONTINUOUSLY);
+	}
 }
 public void stop() {
-	clip.stop();
-	
+	if(clip != null) {
+		clip.stop();
+	}
 }
 public void checkVolume() {
 	switch(volumeScale) {

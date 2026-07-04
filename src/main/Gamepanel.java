@@ -57,6 +57,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public EventHandler eHandler = new EventHandler(this);
     Config config = new Config(this);
     public Quest quest = new Quest(this);
+    public SaveLoad saveLoad = new SaveLoad(this);
     Thread gameThread;
     
     // Entity and obj
