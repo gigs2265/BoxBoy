@@ -35,17 +35,17 @@ public class NPC_Mike extends Entity{
 	
 	public void setIdleDialogues() {
 		idleDialogues[0] = "*smooch*";
-		idleDialogues[1] = "Daddy...";
+		idleDialogues[1] = "Jimmy?";
 		idleDialogues[2] = "Mwah!";
 		idleDialogues[3] = "*kissy noises*";
-		idleDialogues[4] = "Oh my...";
+		idleDialogues[4] = "Did I put sunblock on my head before I left?";
 		idleDialogues[5] = "*giggle*";
 		idleDialogues[6] = "Hehe...";
 		idleDialogues[7] = "*wink*";
 		idleDialogues[8] = "Tee hee!";
 		idleDialogues[9] = "*blush*";
 		idleDialogues[10] = "Mwah mwah!";
-		idleDialogues[11] = "*heart eyes*";
+		idleDialogues[11] = "I need dick and cigs...";
 	}
 	
 	public void setAction() {

@@ -52,14 +52,14 @@ public class NPC_Vic extends Entity {
 	
 	public void setIdleDialogues() {
 		idleDialogues[0] = "I need a white monster...";
-		idleDialogues[1] = "Ugh";
+		idleDialogues[1] = "They got a WaWa around here?";
 		idleDialogues[2] = "*sigh*";
 		idleDialogues[3] = "COME HERE AND HIT ENTR ON ME AND KEEP DOIN IT DUMBASS!!";
 		idleDialogues[4] = "Where are we?";
 		idleDialogues[5] = "My sugar is low";
 		idleDialogues[6] = "Hurry up asshole!!";
 		idleDialogues[7] = "Someones getting an ass beating!";
-		idleDialogues[8] = "Why me?";
+		idleDialogues[8] = "*Beeps in diabetic*";
 		idleDialogues[9] = "THEOOO HELLO?!?!";
 		idleDialogues[10] = "FUCK Rattatuchii!";
 		idleDialogues[11] = "I could be golfing right now...";

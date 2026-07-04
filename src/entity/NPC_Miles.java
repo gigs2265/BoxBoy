@@ -55,8 +55,8 @@ public class NPC_Miles extends Entity{
 		idleDialogues[6] = "I need a TV";
 		idleDialogues[7] = "Mike's an idiot.";
 		idleDialogues[8] = "GOD I love being rich";
-		idleDialogues[9] = "boobs";
-		idleDialogues[10] = "2 jet skis worth...";
+		idleDialogues[9] = "BLOW JOBS! BLOWJOBS! BLOW JOBS!!";
+		idleDialogues[10] = "Vin and Karen are gonna be so pissed if I cant come in later..";
 		idleDialogues[11] = "Fuck off.";
 	}
 	
