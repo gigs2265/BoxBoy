@@ -9,9 +9,8 @@ public class Main {
 	public static JFrame window;
 
 	public static void main(String[] args) {
-		// Use the hardware-accelerated OpenGL pipeline for 2D rendering.
-		// This can be a huge FPS boost on older machines. If the game ever
-		// shows graphical glitches on some PC, delete this line.
+		// Hardware-accelerated OpenGL pipeline for 2D rendering - big FPS
+		// boost on older machines. If graphics ever glitch, delete this line.
 		System.setProperty("sun.java2d.opengl", "true");
 		
 		window = new JFrame();

@@ -112,6 +112,7 @@ public class Gamepanel extends JPanel implements Runnable {
         // RESPAWN PLAYER TO OVERWORLD START POSITION
         player.setDefaultPositions();
         player.restoreLifeAndMana();
+        player.revive();
         
         // SWITCH BACK TO OVERWORLD MAP
         currentMap = 0;
@@ -126,6 +127,7 @@ public class Gamepanel extends JPanel implements Runnable {
         player.setDefaultPositions();
         player.setDefaultValues();
         player.restoreLifeAndMana();
+        player.revive();
         player.setItems();
         
         // RESET TO OVERWORLD
@@ -167,9 +169,6 @@ public class Gamepanel extends JPanel implements Runnable {
             delta += (currentTime - lastTime) / drawInterval;
             lastTime = currentTime;
 
-            // Catch up on game logic if rendering fell behind.
-            // Capped at 5 catch-up updates so an extreme lag spike
-            // (like the window being dragged) can't cause a death spiral.
             int updatesThisLoop = 0;
             while (delta >= 1 && updatesThisLoop < 5) {
                 update();
@@ -180,15 +179,13 @@ public class Gamepanel extends JPanel implements Runnable {
                 delta = 1; // discard unrecoverable backlog
             }
 
-            // Only draw when at least one update happened (something changed)
             if (updatesThisLoop > 0) {
                 drawToTempScreen();
                 drawToScreen();
             }
 
-            // Tiny sleep so the loop doesn't burn 100% of a CPU core
             try {
-                Thread.sleep(1);
+                Thread.sleep(1); // don't burn 100% of a CPU core
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

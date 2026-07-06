@@ -69,6 +69,14 @@ public class Player extends Entity {
         direction = "down";
     }
     
+    public void revive() {
+        // Clear the death state so Theo stands back up after Retry/restart
+        dying = false;
+        dyingCounter = 0;
+        invincible = false;
+        invincibleCounter = 0;
+    }
+    
     public void restoreLifeAndMana() {
         life = maxLife;
         mana = maxMana;
@@ -91,12 +99,17 @@ public class Player extends Entity {
         return defense = dexterity * currentSheild.defenseValue;
     }
 
+    // Death animation sprites
+    BufferedImage dieImage1, dieImage2;
+    
     public void getPlayerImage() {
         try {
             up1 = ImageIO.read(getClass().getResource("/player/theoup1.png"));
             up2 = ImageIO.read(getClass().getResource("/player/theoup2.png"));
             down1 = ImageIO.read(getClass().getResource("/player/downtheo1.png"));
             down2 = ImageIO.read(getClass().getResource("/player/downtheo2.png"));
+            dieImage1 = setup("/player/theodie1", gp.tileSize, gp.tileSize);
+            dieImage2 = setup("/player/theodie2", gp.tileSize, gp.tileSize);
             left1 = ImageIO.read(getClass().getResource("/player/theoleft1.png"));
             left2 = ImageIO.read(getClass().getResource("/player/theoleft2.png"));
             right1 = ImageIO.read(getClass().getResource("/player/theoright1.png"));
@@ -153,6 +166,23 @@ public class Player extends Entity {
     }
 
     public void update() {
+        // DEATH ANIMATION - theodie1 shows for ~2 seconds, then theodie2,
+        // then the game over screen appears. All input and movement is
+        // blocked while dying (draw() picks the sprite from dyingCounter).
+        if (dying == true) {
+            attacking = false;
+            dyingCounter++;
+            
+            if (dyingCounter > 210 && gp.gameState == gp.playState) {
+                // 2s of theodie1 + 1.5s of theodie2, then the game over screen.
+                // NOTE: dying stays TRUE so Theo keeps lying there (theodie2)
+                // behind the game over menu. Retry/restart clear it.
+                gp.gameState = gp.gameOverState;
+                gp.ui.commandNum = -1;
+            }
+            return;
+        }
+        
         if (attacking) {
             attacking();
         }
@@ -246,9 +276,12 @@ public class Player extends Entity {
             mana = maxMana;
         } 
         
-        if(life <= 0) {
-            gp.gameState = gp.gameOverState;
-            gp.ui.commandNum = -1;
+        if(life <= 0 && dying == false) {
+            // Start the death animation - the game over screen comes
+            // after it finishes (see the dying block at the top of update)
+            dying = true;
+            dyingCounter = 0;
+            invincible = true; // nothing can hurt a dying man
             gp.stopMusic();
             gp.playSE(13);
         }
@@ -501,6 +534,17 @@ public class Player extends Entity {
         int cameraY = gp.getCameraY();
         int tempScreenX = worldX - cameraX;
         int tempScreenY = worldY - cameraY;
+
+        // DEATH SPRITES - override everything else while dying
+        if (dying) {
+            if (dyingCounter <= 120) {
+                image = dieImage1; // first ~2 seconds
+            } else {
+                image = dieImage2; // then the second death frame
+            }
+            g2.drawImage(image, tempScreenX, tempScreenY, gp.tileSize, gp.tileSize, null);
+            return;
+        }
 
         switch (direction) {
             case "up":
