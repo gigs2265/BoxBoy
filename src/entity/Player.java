@@ -414,6 +414,8 @@ public class Player extends Entity {
                 boolean isBrian = gp.monster[gp.currentMap][i].name.equals("Brian");
                 boolean killingBlow = (gp.monster[gp.currentMap][i].life - damage <= 0);
                 if(isBrian && killingBlow) {
+                    // Kill the level music so Brian's death sound rings out alone
+                    gp.stopMusic();
                     gp.playSE(18);
                 } else if(isBrian) {
                     gp.playSE(17);

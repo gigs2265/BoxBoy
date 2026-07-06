@@ -35,6 +35,7 @@ public class Sound {
 		soundURL[16] = getClass().getResource("/sound/fartblast.wav");
 		soundURL[17] = getClass().getResource("/sound/brianhit.wav");   // Brian takes a hit
 		soundURL[18] = getClass().getResource("/sound/briandies.wav");  // Brian dies
+		soundURL[19] = getClass().getResource("/sound/victorytheme.wav"); // "You beat the game" screen music (loops)
 	}
 	public void setFile(int i) {
 		try {

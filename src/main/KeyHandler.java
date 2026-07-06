@@ -276,6 +276,7 @@ public class KeyHandler implements KeyListener {
     
     public void victoryState(int code) {
         if(code == KeyEvent.VK_ENTER) {
+            gp.stopMusic(); // stop the looping victory theme
             gp.gameState = gp.titleState;
             gp.restart();
         }

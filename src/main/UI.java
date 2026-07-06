@@ -909,21 +909,14 @@ public class UI {
         }
     }
     
-    BufferedImage titleBackground = null;
-    boolean titleBackgroundLoaded = false;
-    
     public void drawTitleScreen() {
-        // Load the title background ONCE and reuse it.
-        // (It used to be re-read and re-decoded from disk on every single
-        // frame - 60 times a second - which crippled FPS on slower machines.)
-        if(titleBackgroundLoaded == false) {
-            try {
-                InputStream is = getClass().getResourceAsStream("/player/titlescreenboxboy.png");
-                titleBackground = javax.imageio.ImageIO.read(is);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            titleBackgroundLoaded = true;
+        BufferedImage titleBackground = null;
+
+        try {
+            InputStream is = getClass().getResourceAsStream("/player/titlescreenboxboy.png");
+            titleBackground = javax.imageio.ImageIO.read(is);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         if (titleBackground != null) {
@@ -1129,6 +1122,8 @@ public class UI {
                 // Theo ends him. Brian dies and the game is beaten.
                 cutsceneMonster.dying = true;
                 gp.gameState = gp.victoryState;
+                // Victory theme loops for as long as the end screen is up
+                gp.playMusic(19);
             }
             else {
                 // Default: back to gameplay (Nick intro, etc.)
