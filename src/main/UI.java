@@ -909,14 +909,21 @@ public class UI {
         }
     }
     
+    BufferedImage titleBackground = null;
+    boolean titleBackgroundLoaded = false;
+    
     public void drawTitleScreen() {
-        BufferedImage titleBackground = null;
-
-        try {
-            InputStream is = getClass().getResourceAsStream("/player/titlescreenboxboy.png");
-            titleBackground = javax.imageio.ImageIO.read(is);
-        } catch (IOException e) {
-            e.printStackTrace();
+        // Load the title background ONCE and reuse it.
+        // (It used to be re-read and re-decoded from disk on every single
+        // frame - 60 times a second - which crippled FPS on slower machines.)
+        if(titleBackgroundLoaded == false) {
+            try {
+                InputStream is = getClass().getResourceAsStream("/player/titlescreenboxboy.png");
+                titleBackground = javax.imageio.ImageIO.read(is);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            titleBackgroundLoaded = true;
         }
 
         if (titleBackground != null) {

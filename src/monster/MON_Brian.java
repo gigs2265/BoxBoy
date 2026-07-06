@@ -9,6 +9,11 @@ public class MON_Brian extends Entity {
 	
 	Gamepanel gp;
 	
+	// POOP ATTACK - Brian poops out Rattatuchiis during the fight
+	int poopCounter = 0;
+	final int POOP_INTERVAL = 600;    // one poop every ~10 seconds of combat
+	final int MAX_POOPED_TUCHIS = 3;  // max of his tuchis alive at once
+	
 	public MON_Brian(Gamepanel gp) {
 		super(gp);
 		this.gp = gp;
@@ -56,6 +61,16 @@ public class MON_Brian extends Entity {
 		int xDistance = Math.abs(worldX - gp.player.worldX);
 		int yDistance = Math.abs(worldY - gp.player.worldY);
 		int tileDistance = (xDistance + yDistance) / gp.tileSize;
+		
+		// POOP ATTACK - while the fight is engaged, the poop timer ticks.
+		// Every POOP_INTERVAL updates Brian squeezes out a Rattatuchii.
+		if(tileDistance < 12) {
+			poopCounter++;
+			if(poopCounter >= POOP_INTERVAL) {
+				poopCounter = 0;
+				poopTuchi();
+			}
+		}
 		
 		// BOSS BRIAN AI - Aggressive milkshot spammer
 		
@@ -166,6 +181,57 @@ public class MON_Brian extends Entity {
 				direction = "up";
 			}
 		}
+	}
+	
+	public void poopTuchi() {
+		// Count Brian's tuchis already alive near him (within 15 tiles) and
+		// find a free slot in the monster array. The cap only counts NEARBY
+		// tuchis so the one wandering the hallway doesn't eat into his quota.
+		int nearbyTuchis = 0;
+		int freeSlot = -1;
+		for(int i = 0; i < gp.monster[gp.currentMap].length; i++) {
+			if(gp.monster[gp.currentMap][i] == null) {
+				if(freeSlot == -1) {
+					freeSlot = i;
+				}
+			}
+			else if(gp.monster[gp.currentMap][i] instanceof MON_Tuchi && gp.monster[gp.currentMap][i].alive == true) {
+				int dist = (Math.abs(gp.monster[gp.currentMap][i].worldX - worldX)
+				          + Math.abs(gp.monster[gp.currentMap][i].worldY - worldY)) / gp.tileSize;
+				if(dist <= 15) {
+					nearbyTuchis++;
+				}
+			}
+		}
+		if(nearbyTuchis >= MAX_POOPED_TUCHIS || freeSlot == -1) {
+			return; // arena already crawling, or no room in the monster array
+		}
+		
+		// Spawn position: right behind Brian based on where he's facing.
+		// (Brian's sprite is 4 tiles big, a tuchi is 1 tile.)
+		int spawnX = worldX + gp.tileSize + gp.tileSize/2; // his horizontal center
+		int spawnY = worldY + gp.tileSize + gp.tileSize/2; // his vertical center
+		switch(direction) {
+			case "up":    spawnY = worldY + gp.tileSize*4; break; // out the bottom
+			case "down":  spawnY = worldY - gp.tileSize;   break; // out the top
+			case "left":  spawnX = worldX + gp.tileSize*4; break; // out the right side
+			case "right": spawnX = worldX - gp.tileSize;   break; // out the left side
+		}
+		
+		// Never poop a tuchi into a wall - if blocked, it plops out underneath him
+		int col = (spawnX + gp.tileSize/2) / gp.tileSize;
+		int row = (spawnY + gp.tileSize/2) / gp.tileSize;
+		if(gp.tileM.tile[gp.tileM.mapTileNum[gp.currentMap][col][row]].collision == true) {
+			spawnX = worldX + gp.tileSize + gp.tileSize/2;
+			spawnY = worldY + gp.tileSize*2;
+		}
+		
+		MON_Tuchi tuchi = new MON_Tuchi(gp);
+		tuchi.worldX = spawnX;
+		tuchi.worldY = spawnY;
+		gp.monster[gp.currentMap][freeSlot] = tuchi;
+		
+		gp.playSE(16); // fartblast!
 	}
 	
 	public void checkDrop() {

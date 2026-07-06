@@ -286,6 +286,17 @@ public class KeyHandler implements KeyListener {
             enterPressed = true;
         }
 
+        // CHEST LOOT SCREEN - chests skip the buy/sell menu entirely, so
+        // their keys must be handled here directly. Without this, the cursor
+        // could never move and Q could never close the chest (the lock-up bug).
+        if (gp.ui.npc instanceof object.OBJ_Chest) {
+            npcInventory(code); // W/A/S/D moves the selection cursor
+            if (code == KeyEvent.VK_Q) {
+                gp.gameState = gp.playState; // close the chest
+            }
+            return;
+        }
+
         if (gp.ui.subState == 0) {
             if (code == KeyEvent.VK_W) {
                 gp.ui.commandNum--;

@@ -47,7 +47,7 @@ public class Gamepanel extends JPanel implements Runnable {
     // FPS
     final int FPS = 60;
 
-    TileManager tileM = new TileManager(this);
+    public TileManager tileM = new TileManager(this);
     public KeyHandler keyH = new KeyHandler(this);
     Sound music = new Sound();
     Sound se = new Sound();
@@ -98,7 +98,9 @@ public class Gamepanel extends JPanel implements Runnable {
         aSetter.setMonster();
         gameState = titleState;
         
-        tempScreen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_ARGB);
+        // TYPE_INT_RGB (no alpha channel): the screen buffer is fully opaque anyway,
+        // and opaque buffers draw noticeably faster on weaker hardware
+        tempScreen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_RGB);
         g2 = (Graphics2D)tempScreen.getGraphics(); 
         
         if(fullScreenOn == true) {
@@ -150,20 +152,43 @@ public class Gamepanel extends JPanel implements Runnable {
 
     @Override
     public void run() {
+        // FIXED-TIMESTEP GAME LOOP
+        // Game logic always runs at 60 updates per real second, no matter how
+        // slow the computer is. If rendering can't keep up, we skip drawing
+        // some frames instead of slowing the whole game down. Slow machines
+        // get a lower visual FPS but the game always PLAYS at correct speed.
         double drawInterval = 1000000000.0 / FPS;
-        double nextDrawTime = System.nanoTime() + drawInterval;
+        double delta = 0;
+        long lastTime = System.nanoTime();
+        long currentTime;
 
         while (gameThread != null) {
-            update();
-            drawToTempScreen();
-            drawToScreen();
+            currentTime = System.nanoTime();
+            delta += (currentTime - lastTime) / drawInterval;
+            lastTime = currentTime;
 
+            // Catch up on game logic if rendering fell behind.
+            // Capped at 5 catch-up updates so an extreme lag spike
+            // (like the window being dragged) can't cause a death spiral.
+            int updatesThisLoop = 0;
+            while (delta >= 1 && updatesThisLoop < 5) {
+                update();
+                delta--;
+                updatesThisLoop++;
+            }
+            if (delta > 1) {
+                delta = 1; // discard unrecoverable backlog
+            }
+
+            // Only draw when at least one update happened (something changed)
+            if (updatesThisLoop > 0) {
+                drawToTempScreen();
+                drawToScreen();
+            }
+
+            // Tiny sleep so the loop doesn't burn 100% of a CPU core
             try {
-                double remainingTime = nextDrawTime - System.nanoTime();
-                remainingTime /= 1000000;
-                if (remainingTime < 0) remainingTime = 0;
-                Thread.sleep((long) remainingTime);
-                nextDrawTime += drawInterval;
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

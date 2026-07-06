@@ -39,6 +39,11 @@ public class OBJ_Chest extends Entity {
 			if(inventory.size() > 0) {
 				gamePanel.gameState = gamePanel.tradeState;
 				gamePanel.ui.npc = this;
+				// Reset the selection cursor - it's shared with the merchant
+				// screen, and a stale position past the chest's item count
+				// made ENTER do nothing (the lock-up bug)
+				gamePanel.ui.npcSlotCol = 0;
+				gamePanel.ui.npcSlotRow = 0;
 			} else {
 				gamePanel.ui.currentDialouge = "The chest is empty!";
 			}
@@ -88,6 +93,11 @@ public class OBJ_Chest extends Entity {
 			if(inventory.size() > 0) {
 				gamePanel.gameState = gamePanel.tradeState;
 				gamePanel.ui.npc = this;
+				// Reset the selection cursor - it's shared with the merchant
+				// screen, and a stale position past the chest's item count
+				// made ENTER do nothing (the lock-up bug)
+				gamePanel.ui.npcSlotCol = 0;
+				gamePanel.ui.npcSlotRow = 0;
 			} else {
 				gamePanel.ui.currentDialouge = "The chest is empty!";
 			}
