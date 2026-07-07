@@ -21,6 +21,7 @@ public class TileManager {
         getTileImage();
         loadMap("/maps/world.txt",0);
         loadMap ("/maps/dundgonmap.txt", 1);
+        loadMap("/maps/hutmap.txt", 2);   // Josh's hut interior
     }
 
     public void getTileImage() {

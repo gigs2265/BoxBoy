@@ -211,8 +211,11 @@ public class SaveLoad {
 			gp.aSetter.setNPC();
 			gp.aSetter.setMonster();
 			
+			// Older save files may hold fewer object slots than the game now
+			// has - only read as many as the save actually contains
+			int savedSlots = Math.min(gp.obj[0].length, ds.mapObjectNames[0].length);
 			for(int mapNum = 0; mapNum < gp.maxMap; mapNum++) {
-				for(int i = 0; i < gp.obj[0].length; i++) {
+				for(int i = 0; i < savedSlots; i++) {
 					if(ds.mapObjectNames[mapNum][i].equals("NA")) {
 						gp.obj[mapNum][i] = null;
 					}

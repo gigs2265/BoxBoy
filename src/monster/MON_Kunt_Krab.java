@@ -16,6 +16,7 @@ Gamepanel gp;
 		maxLife = 7;
 		life = maxLife;
 		attack = 5;
+		heavyHitter = true; // punches through heavy armor (see Entity.damagePlayer)
 		defense = 2;
 		exp = 5;
 		

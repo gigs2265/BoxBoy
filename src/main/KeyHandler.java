@@ -151,6 +151,7 @@ public class KeyHandler implements KeyListener {
             switch(gp.currentMap) {
                 case 0: gp.tileM.loadMap("/maps/world.txt", 0); break;
                 case 1: gp.tileM.loadMap("/maps/dundgonmap.txt", 1); break;
+                case 2: gp.tileM.loadMap("/maps/hutmap.txt", 2); break;
             }
         }
     }

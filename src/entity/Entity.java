@@ -32,6 +32,7 @@ public class Entity {
 	public boolean invincible = false;
 	boolean attacking = false;
 	public boolean alive = true;
+	public boolean heavyHitter = false; // ignores half the player's defense, always deals at least 1
 	public boolean dying = false;
 	boolean hpBarOn = false;
 	public int invincibleCounter = 0;
@@ -208,9 +209,21 @@ public class Entity {
 		if(gp.player.invincible == false) {
 			//damage
 			gp.playSE(8);
-			int damage =  attack - gp.player.defense;
-			if(damage < 0) {
-				damage = 0;
+			int damage;
+			if(heavyHitter == true) {
+				// HEAVY HITTERS punch through armor: only half the player's
+				// defense counts, and they always deal at least 1 damage.
+				// Strong shields (Hot Burg) still reduce the pain - they just
+				// can't make Theo unkillable anymore.
+				damage = attack - gp.player.defense / 2;
+				if(damage < 1) {
+					damage = 1;
+				}
+			} else {
+				damage = attack - gp.player.defense;
+				if(damage < 0) {
+					damage = 0;
+				}
 			}
             gp.player.life -= damage;
 			

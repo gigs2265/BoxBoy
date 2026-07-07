@@ -62,7 +62,7 @@ public class Gamepanel extends JPanel implements Runnable {
     
     // Entity and obj
     public Player player = new Player(this, keyH);
-    public Entity obj[][] = new Entity[maxMap][30];
+    public Entity obj[][] = new Entity[maxMap][50]; // grown from 30 - the island ran out of slots
     public Entity npc[][] = new Entity[maxMap][18];
     public Entity monster[][] = new Entity[maxMap][30];
     public ArrayList<Entity> projectileList = new ArrayList<>();

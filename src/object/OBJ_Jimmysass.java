@@ -10,7 +10,7 @@ public class OBJ_Jimmysass extends Entity {
 		type = type_ass;
 		name = "Jimmy's Big Fat Ass";
 		down1 = setup("/objects/jimmysass", gp.tileSize, gp.tileSize);
-		attackValue = 20;
+		attackValue = 5;
 		attackArea.width = 30;
 		attackArea.height = 30;
 		description = "["+name+"]\n Heavy but powerful";

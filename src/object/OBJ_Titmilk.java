@@ -17,6 +17,7 @@ public class OBJ_Titmilk extends Projectile {
 		maxLife = 80;
 		life = maxLife;
 		attack = 4;
+		heavyHitter = true; // punches through heavy armor (see Entity.damagePlayer)
 		usedCost = 1;
 		alive = false;
 		getImage();

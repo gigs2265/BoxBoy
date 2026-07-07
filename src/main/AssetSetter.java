@@ -43,8 +43,10 @@ public class AssetSetter {
 		i++;
 		
 		gp.obj[mapNum][i] = new OBJ_Key(gp);
-		gp.obj[mapNum][i].worldX = gp.tileSize * 832;
-		gp.obj[mapNum][i].worldY = gp.tileSize * 188;
+		// FIXED: this key was at tile (832,188) - miles outside the 50x50 map
+		// and impossible to ever pick up. Moved to the north-east clearing.
+		gp.obj[mapNum][i].worldX = gp.tileSize * 40;
+		gp.obj[mapNum][i].worldY = gp.tileSize * 5;
 		i++;
 		
 		gp.obj[mapNum][i] = new OBJ_Key(gp);
@@ -182,6 +184,23 @@ public class AssetSetter {
 		gp.obj[mapNum][i].worldY = gp.tileSize * 43;
 		i++;
 		
+		// ISLAND TREASURE - beach chest in the far south-east corner
+		// (a trek, so it pays better)
+		OBJ_Chest islandChest4 = new OBJ_Chest(gp);
+		islandChest4.worldX = gp.tileSize * 48;
+		islandChest4.worldY = gp.tileSize * 43;
+		islandChest4.setLoot(new OBJ_Fart_Coin(gp));
+		islandChest4.setLoot(new OBJ_Fart_Coin(gp));
+		islandChest4.setLoot(new OBJ_Beer(gp));
+		gp.obj[mapNum][i] = islandChest4;
+		i++;
+		
+		// Loose key in the southern field
+		gp.obj[mapNum][i] = new OBJ_Key(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize * 25;
+		gp.obj[mapNum][i].worldY = gp.tileSize * 35;
+		i++;
+		
 		// DUNGEON OBJECTS (Map 1)
 		mapNum = 1;
 		i = 0;
@@ -275,6 +294,14 @@ public class AssetSetter {
 		gp.npc[mapNum][i] = new NPC_Josh(gp);
 		gp.npc[mapNum][i].worldX = gp.tileSize * 42;
 		gp.npc[mapNum][i].worldY = gp.tileSize * 34;
+		i++;
+		
+		// JOSH'S HUT (Map 2) - Josh behind his shop table
+		mapNum = 2;
+		i = 0;
+		gp.npc[mapNum][i] = new NPC_Josh(gp);
+		gp.npc[mapNum][i].worldX = gp.tileSize * 25;
+		gp.npc[mapNum][i].worldY = gp.tileSize * 22;
 		i++;
 	}
 	

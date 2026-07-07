@@ -52,6 +52,9 @@ public class EventHandler {
             else if(hit(0, 13, 23, "any") == true) {damagePit(13);}
             else if(hit(0, 48, 5, "any") == true) {teleport(1, 5, 47);}  // Enter dungeon: spawn in the small entrance hallway
             else if(hit(1, 2, 47, "any") == true) {teleport(0, 47, 5);}  // Exit dungeon via stairs (spawn next to overworld stairs, not on them)
+            // JOSH'S HUT - step onto the hut to go inside, step on the door to leave
+            else if(hit(0, 11, 30, "any") == true) {teleport(2, 25, 26);}
+            else if(hit(2, 25, 28, "any") == true) {teleport(0, 11, 31);}
             // NICK INTRO CUTSCENE - fires once when entering Nick's room (3-tile-wide opening)
             else if(hit(1, 14, 29, "any") == true) {nickIntro();}
             else if(hit(1, 14, 30, "any") == true) {nickIntro();}

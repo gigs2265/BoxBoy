@@ -18,6 +18,7 @@ public class MON_Armored_Tuchi extends Entity {
 		maxLife = 12;
 		life = maxLife;
 		attack = 4;
+		heavyHitter = true; // punches through heavy armor (see Entity.damagePlayer)
 		defense = 2;
 		exp = 10;
 		

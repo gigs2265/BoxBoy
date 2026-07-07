@@ -23,6 +23,7 @@ public class MON_Brian extends Entity {
 		maxLife = 40;
 		life = maxLife;
 		attack = 6;
+		heavyHitter = true; // punches through heavy armor (see Entity.damagePlayer)
 		defense = 2;
 		exp = 40;
 		projectile = new OBJ_Titmilk(gp);
