@@ -12,6 +12,7 @@ Gamepanel gp;
 		this.gp = gp;
 		type = type_monster;
 		name = "a Kunt Krab";
+		pcName = "a Kitty Krab";
 		speed = 4;
 		maxLife = 7;
 		life = maxLife;

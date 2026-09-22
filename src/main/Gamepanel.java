@@ -43,6 +43,7 @@ public class Gamepanel extends JPanel implements Runnable {
     BufferedImage tempScreen;
     Graphics2D g2;
     public boolean fullScreenOn = false;
+    public boolean pcMode = false; // "PC Mode" - swaps dialogue/text for sanitized versions
 
     // FPS
     final int FPS = 60;

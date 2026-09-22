@@ -14,6 +14,7 @@ public class OBJ_Boxcutter extends Entity {
 		attackArea.width = 30;
 		attackArea.height = 30;
 		description = "["+name+"]\n AKA a Theo's head cutter.";
+		pcDescription = "["+name+"]\n A versatile hand tool suitable for \n a variety of workplace situations.";
 	}
 
 }

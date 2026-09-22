@@ -9,6 +9,7 @@ public class NPC_Ian extends Entity {
 	
 	
 	String[] idleDialogues = new String[12];
+	String[] idlePcDialogues = new String[12]; // "PC Mode" sanitized idle bubbles, same indices - see main.PcText
 	
 	public NPC_Ian(Gamepanel gp) {
 		super(gp);
@@ -47,6 +48,19 @@ public class NPC_Ian extends Entity {
 		dialouges[9] = "After that i was locked away by thoes rude \n(but sexy) rat people.";
 		dialouges[10] = "If i wasn't so scared I would fuck one!";
 		dialouges[11] = "Go on without me, my ass still hurts and its hard to walk.";
+
+		pcDialouges[0] = "Oh my goodness, you found me!";
+		pcDialouges[1] = "I'm so happy I could give you a \nwarm, enthusiastic hug!";
+		pcDialouges[2] = "That has nothing to do with the fact \nthat I am a proud member of the community...";
+		pcDialouges[3] = "Anyway, the reason I ended up here is that after I \nwoke up, the Rat King, Rattatuchii, informed the \nisland's leadership that I'd resumed smoking.";
+		pcDialouges[4] = "I shared that with Rattatuchii in confidence \nduring a private conversation...nevermind.";
+		pcDialouges[5] = "I gathered some information from a very kind, slender \ngentleman who was involved in detaining us alongside \nRattatuchii.";
+		pcDialouges[6] = "He told me his name but I honestly forgot, since our \nconversation was quite memorable in other ways. \nI believe it started with a J though.";
+		pcDialouges[7] = "He and Rattatuchii spent considerable time with me, \nit was quite an experience... a difficult one!";
+		pcDialouges[8] = "He did mention he was only following orders, and that \nhis colleague would apply significant pressure if he \ndidn't comply.";
+		pcDialouges[9] = "After that I was kept here by those \nunfriendly (but well-dressed) rat people.";
+		pcDialouges[10] = "If I weren't so nervous, I'd try to befriend one!";
+		pcDialouges[11] = "Go on without me, I'm still a bit sore and \nwalking is difficult right now.";
 	}
 	
 	public void setIdleDialogues() {
@@ -62,6 +76,19 @@ public class NPC_Ian extends Entity {
 		idleDialogues[9] = "They better have left me some COCK";
 		idleDialogues[10] = "Rattatuchii...";
 		idleDialogues[11] = "This is what i get for stealing mike's savannah.";
+
+		idlePcDialogues[0] = "Oh my...";
+		idlePcDialogues[1] = "Fabulous!";
+		idlePcDialogues[2] = "I'm a bit sore...";
+		idlePcDialogues[3] = "Ow ow ow...";
+		idlePcDialogues[4] = "I could use some companionship!";
+		idlePcDialogues[5] = "I need a cigarette!";
+		idlePcDialogues[6] = "*Where's the dance floor?*";
+		idlePcDialogues[7] = "I wonder if I'll update my style next week.";
+		idlePcDialogues[8] = "Mike's in great shape";
+		idlePcDialogues[9] = "They better have left me a snack";
+		idlePcDialogues[10] = "Rattatuchii...";
+		idlePcDialogues[11] = "This is what I get for borrowing Mike's \ncologne without asking.";
 	}
 	
 	public void setAction() {
@@ -103,7 +130,7 @@ public class NPC_Ian extends Entity {
 				if(random.nextInt(100) < 35) {
 					// Pick a random dialogue
 					int dialogueIndex = random.nextInt(idleDialogues.length);
-					idleDialogue = idleDialogues[dialogueIndex];
+					idleDialogue = main.PcText.pick(gp, idleDialogues[dialogueIndex], idlePcDialogues[dialogueIndex]);
 					showIdleDialogue = true;
 					idleDialogueTimer = 0;
 				} else {

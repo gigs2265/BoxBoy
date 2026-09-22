@@ -6,6 +6,7 @@ import main.Gamepanel;
 public class NPC_Liam extends Entity {
 	
 	String[] idleDialogues = new String[12];
+	String[] idlePcDialogues = new String[12]; // "PC Mode" sanitized idle bubbles, same indices - see main.PcText
 	
 	public NPC_Liam(Gamepanel gp) {
 	    super(gp);
@@ -43,7 +44,22 @@ public class NPC_Liam extends Entity {
 		dialouges[10] = "...";
 		dialouges[11] = "Anyway...";
 		dialouges[12] = "If you find the others come back and get me so we \ncan get out of this hell hole";
-		dialouges[13] = "I would tag along but I have  about 80 more hail \nMarys left to do plus if someone sees my \nSOS signal in the sand I dont want to be gone."; 
+		dialouges[13] = "I would tag along but I have  about 80 more hail \nMarys left to do plus if someone sees my \nSOS signal in the sand I dont want to be gone.";
+
+		pcDialouges[0] = "I hold a traditional view on teaching roles, \nand I respectfully ask for quiet reflection!!";
+		pcDialouges[1] = "Th...Theo?";
+		pcDialouges[2] = "The Lord is good to all, and His tender mercies are \nover all His works!";
+		pcDialouges[3] = "I thought you all might not have made it! \n Have you located the others?";
+		pcDialouges[4] = "I'm not entirely sure what happened after we got \nback in your car last night.";
+		pcDialouges[5] = "All I know is as soon as I closed the door I saw a \nbright white light, and then I ended up here.";
+		pcDialouges[6] = "Thankfully, I kept this cross safely on my person \nall night so whoever brought us here couldn't take \nit! Good thing it wasn't Ian's turn to hold it.";
+		pcDialouges[7] = "It's what has been keeping me grounded \nsince I woke up.";
+		pcDialouges[8] = "I do wish I had my personal defense equipment \nwith the extra attachment, but I believe it \nwas taken.";
+		pcDialouges[9] = "I WOULD HAVE FINALLY HAD \nA CHANCE TO USE IT!!!!!!";
+		pcDialouges[10] = "...";
+		pcDialouges[11] = "Anyway...";
+		pcDialouges[12] = "If you find the others, please come back for me \nso we can all leave this difficult place.";
+		pcDialouges[13] = "I would join you, but I have about 80 more prayers \nleft to complete, and if someone spots my \nSOS signal in the sand I'd rather not have left.";
 	}
 	
 	public void setIdleDialogues() {
@@ -59,6 +75,19 @@ public class NPC_Liam extends Entity {
 		idleDialogues[9] = "The SOS signal...";
 		idleDialogues[10] = "Faith will save us...";
 		idleDialogues[11] = "Amen.";
+
+		idlePcDialogues[0] = "Hail Mary...";
+		idlePcDialogues[1] = "The Lord is good...";
+		idlePcDialogues[2] = "Praise Jesus!";
+		idlePcDialogues[3] = "Not now, Mom, I'm stranded on an island";
+		idlePcDialogues[4] = "HELP!!";
+		idlePcDialogues[5] = "Watch out for the crab creatures!";
+		idlePcDialogues[6] = "God help us";
+		idlePcDialogues[7] = "Tim 2:12";
+		idlePcDialogues[8] = "I miss my equipment...";
+		idlePcDialogues[9] = "The SOS signal...";
+		idlePcDialogues[10] = "Faith will save us...";
+		idlePcDialogues[11] = "Amen.";
 	}
 	
 	public void setAction() {
@@ -80,7 +109,8 @@ public class NPC_Liam extends Entity {
 			if(idleDialogueTimer > 320) {
 				Random random = new Random();
 				if(random.nextInt(100) < 40) {
-					idleDialogue = idleDialogues[random.nextInt(idleDialogues.length)];
+					int idleIndex = random.nextInt(idleDialogues.length);
+					idleDialogue = main.PcText.pick(gp, idleDialogues[idleIndex], idlePcDialogues[idleIndex]);
 					showIdleDialogue = true;
 					idleDialogueTimer = 0;
 				} else { idleDialogueTimer = 0; }

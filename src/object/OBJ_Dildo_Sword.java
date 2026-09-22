@@ -15,6 +15,7 @@ public class OBJ_Dildo_Sword extends Entity{
 			attackArea.width = 30;
 			attackArea.height = 30;
 			description = "["+name+"]\n Ian has alot of explaining to do.";
+			pcDescription = "["+name+"]\n Ian has graciously agreed to share \n a personal item for the cause.";
 			price = 20;
 		}
 		

@@ -14,6 +14,7 @@ public class OBJ_Spray_Normal extends Entity{
 		attackArea.width = 36;
 		attackArea.height = 36;
 		description = "["+name+"]\n Standard Rat Killer.";
+		pcDescription = "["+name+"]\n A standard-issue humane pest \n deterrent.";
 		
 		
 	}

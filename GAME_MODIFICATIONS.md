@@ -1,679 +1,318 @@
-# My2dgame - Complete Modification Documentation
+# Box Boy! - Complete Modification Documentation
 
 ## Project Overview
-This is a 2D action RPG Java game called "Box Boy!" built with Java Swing/AWT. The player (Theo) explores an island with friends who have been captured and must defeat enemies to escape.
+This is a 2D action RPG Java game called "Box Boy!" built with Java Swing/AWT. The player (Theo) wakes up on an island with friends who have been captured, must find them, rescue one more from a dungeon, then defeat a mini-boss and a final boss to escape.
 
 **Technical Specs:**
-- Built with Java Swing/AWT
-- 60 FPS game loop
+- Built with Java Swing/AWT (no external libraries/engine)
+- 60 FPS fixed-timestep game loop (logic always runs at 60 updates/sec; rendering drops frames on slow machines instead of slowing the game down)
 - Tile size: 16px scaled 3x = 48px tiles
 - Screen: 960x576 (20x12 tiles)
 - World: 50x50 tiles per map
-- 2 maps: Overworld (Map 0) and Dungeon (Map 1)
+- 3 maps: Overworld (Map 0), Dungeon (Map 1), Josh's Hut interior (Map 2)
+
+**Project Location:** `C:\Users\Owner\Documents\Eclipse workspace\My2dgame`
+
+This file supersedes the older `GAME_MODIFICATIONS.md` history and the separate `BOXBOYNOTES.md` (both deleted 2026-09-21) — it reflects what's actually in the code now, in one place.
+
+---
+
+## Codebase Map
+
+```
+src/
+  main/     - engine: game loop, input, collision, events, UI, quest, save/load, sound
+  entity/   - Entity base class, Player, Projectile, NPC_* (7 friends)
+  monster/  - MON_Tuchi, MON_Armored_Tuchi, MON_Kunt_Krab, MON_Nick, MON_Brian
+  object/   - weapons, shields, consumables, doors, chest, keys, coins
+  tile/     - Tile, TileManager (loads maps from res/maps/*.txt)
+```
+
+- **`main.Gamepanel`** owns the entity arrays (`obj`, `npc`, `monster`, `projectileList`), the game loop, and the camera-clamp helpers (`getCameraX/Y`).
+- **`main.AssetSetter`** is the single place all objects/NPCs/monsters get spawned per map (`setObject()`, `setNPC()`, `setMonster()`), called both at game start and on retry/restart.
+- **`main.UI`** draws every screen (HUD, dialogue, inventory, trade/chest, pause, options, title, game over, victory) and owns the cutscene player.
+- **`main.Quest`** is a flat set of booleans plus two getter methods (`getQuestName()`, `getCurrentObjective()`) that the UI reads to render the tracker (press P).
 
 ---
 
 ## Modification 1: Camera Edge Clamping (Fixed Black Borders)
 
-### Problem
-When the player moved near map edges, the camera would show black areas outside the map boundaries.
+**Problem:** Near map edges the camera showed black areas outside the map.
 
-### Solution
-Implemented camera bounds clamping to prevent black areas from showing.
+**Solution:** `Gamepanel.getCameraX()` / `getCameraY()` clamp the camera to `[0, worldWidth - screenWidth]` / `[0, worldHeight - screenHeight]`. `TileManager.draw()`, `Entity.draw()`, and `Player.draw()` all compute `screenX/screenY` from these clamped values instead of the player's raw world position, so the player sprite visibly slides toward the screen edge (instead of staying dead-center) as the camera stops.
 
-### Files Modified
-
-#### **1. Gamepanel.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\main\Gamepanel.java`)
-
-**Added methods (lines 301-329):**
-```java
-// Helper methods for camera bounds clamping
-// Prevents black areas from showing at map edges
-public int getCameraX() {
-    int cameraX = player.worldX - player.screenX;
-
-    // Clamp to map boundaries
-    if (cameraX < 0) {
-        cameraX = 0;
-    }
-    if (cameraX > worldWidth - screenWidth) {
-        cameraX = worldWidth - screenWidth;
-    }
-
-    return cameraX;
-}
-
-public int getCameraY() {
-    int cameraY = player.worldY - player.screenY;
-
-    // Clamp to map boundaries
-    if (cameraY < 0) {
-        cameraY = 0;
-    }
-    if (cameraY > worldHeight - screenHeight) {
-        cameraY = worldHeight - screenHeight;
-    }
-
-    return cameraY;
-}
-```
-
-#### **2. TileManager.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\tile\TileManager.java`)
-
-**Modified draw() method (lines 148-173):**
-- Changed from using `gp.player.worldX/worldY` directly
-- Now uses `gp.getCameraX()` and `gp.getCameraY()` for clamped camera position
-- Updated visibility checks to use clamped camera coordinates
-
-#### **3. Entity.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\Entity.java`)
-
-**Modified draw() method (lines 215-227):**
-- Changed screen position calculation to use clamped camera
-- Updated visibility bounds checking
-
-#### **4. Player.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\Player.java`)
-
-**Modified draw() method (lines 435-442):**
-- Player sprite position now adjusts when camera is clamped at edges
-- Allows player to move away from screen center when near map boundaries
-
-### Result
-- Camera stops at map edges
-- No black areas visible
-- Player sprite smoothly moves toward screen edges when approaching map boundaries
-- All entities (NPCs, monsters, objects) render correctly at map edges
+**Files:** `Gamepanel.java`, `TileManager.java`, `Entity.java`, `Player.java`
 
 ---
 
-## Modification 2: Jimmy's Ass Weapon Sound Effect
+## Modification 2: Weapon-Specific Sound Effects
 
-### Problem
-All weapons used the same attack sound (spray sound effect #6).
+**Problem:** Every weapon played the same attack sound (spray sound, #6).
 
-### Solution
-Added weapon-specific sound effects, specifically for Jimmy's Ass weapon to use the fart blast sound.
+**Solution:** `Player.interactNPC()` checks `currentWepon.type` and plays sound 16 (`fartblast.wav`) for Jimmy's Ass (`type_ass`), sound 6 (`spraysound.wav`) for everything else.
 
-### Files Modified
-
-#### **Player.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\Player.java`)
-
-**Modified interactNPC() method (lines 343-359):**
-```java
-public void interactNPC(int i) {
-    if (keyH.enterPressed) {
-        if (i != 999) {
-            gp.gameState = gp.dialougeState;
-            gp.npc[gp.currentMap][i].speak();
-        } else {
-            // Play different attack sound based on weapon type
-            if (currentWepon.type == type_ass) {
-                gp.playSE(16); // Fart blast sound for Jimmy's Ass
-            } else {
-                gp.playSE(6); // Spray sound for other weapons
-            }
-            attacking = true;
-        }
-        keyH.enterPressed = false;
-    }
-}
-```
-
-### Sound Effect Mapping
-- Sound 6 = `spraysound.wav` (default weapons)
-- Sound 16 = `fartblast.wav` (Jimmy's Ass weapon)
-
-### Result
-- Jimmy's Ass weapon now plays fart blast sound when attacking
-- All other weapons continue using the spray sound
-- Adds humor and weapon personality
+**File:** `Player.java`
 
 ---
 
 ## Modification 3: Progressive Quest System
 
-### Overview
-Implemented a comprehensive quest progression system that guides the player through finding friends in a specific order, then completing dungeon objectives.
-
-### Quest Progression Chain
-1. **Find all your friends** - Find 5 NPCs on overworld in order
-   - Talk to Vic (complete all 11 dialogues)
-   - Find Mike (1 dialogue)
-   - Find Ian (complete all 12 dialogues)
-   - Find Liam (complete all 14 dialogues)
-   - Find Miles (complete all 13 dialogues) - Requires unlocking special door
-2. **Wait, Where's John?** - Find John in the dungeon
-3. **Kill Nick** - Defeat Nick mini-boss
-4. **Kill Brian** - Defeat Brian final boss
-
-### Files Modified
-
-#### **1. Quest.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\main\Quest.java`)
-
-**Complete rewrite with new quest tracking:**
-
-```java
-package main;
-
-public class Quest {
-    Gamepanel gp;
-    public String name;
-
-    // Main quest stages
-    public boolean foundAllFriends = false;
-    public boolean foundJohn = false;
-    public boolean defeatedNick = false;
-    public boolean defeatedBrian = false;
-
-    // Friend-finding sub-quests (overworld)
-    public boolean talkedToVic = false;
-    public boolean foundMike = false;
-    public boolean foundIan = false;
-    public boolean foundLiam = false;
-    public boolean foundMiles = false;
-
-    public Quest(Gamepanel gp) {
-        this.gp = gp;
-        this.name = "Find all your friends";
-    }
-
-    public String getQuestName() {
-        if(!foundAllFriends) {
-            return "Find all your friends";
-        } else if(!foundJohn) {
-            return "Wait, Where's John?";
-        } else if(!defeatedNick) {
-            return "Kill Nick";
-        } else if(!defeatedBrian) {
-            return "Kill Brian";
-        } else {
-            return "Quest Complete!";
-        }
-    }
-
-    public String getCurrentObjective() {
-        if(!foundAllFriends) {
-            return "Find your friends on the island";
-        } else if(!foundJohn) {
-            return "Find John";
-        } else if(!defeatedNick) {
-            return "Defeat Nick";
-        } else if(!defeatedBrian) {
-            return "Defeat Brian";
-        } else {
-            return "Escape the island!";
-        }
-    }
-
-    // Completion methods
-    public void completeTalkToVic() { ... }
-    public void completeFoundMike() { ... }
-    public void completeFoundIan() { ... }
-    public void completeFoundLiam() { ... }
-    public void completeFoundMiles() { ... }
-    public void completeFoundAllFriends() { ... }
-    public void completeFoundJohn() { ... }
-    public void completeDefeatedNick() { ... }
-    public void completeDefeatedBrian() { ... }
-
-    public boolean canUnlockMilesDoor() {
-        return foundLiam;
-    }
-}
-```
-
-#### **2. Entity.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\Entity.java`)
-
-**Added dialogue tracking (line 43):**
-```java
-public boolean dialogueComplete = false; // Track if all dialogues have been shown
-```
-
-**Modified speak() method (lines 106-128):**
-```java
-public void speak() {
-    if(dialouges[dialougeIndex] == null) {
-        dialougeIndex = 0;
-        dialogueComplete = true; // Reached the end of dialogues
-    }
-    gp.ui.currentDialouge = dialouges[dialougeIndex];
-    dialougeIndex++;
-
-    switch(gp.player.direction) {
-        case"up": direction = "down"; break;
-        case "down": direction = "up"; break;
-        case "left": direction = "right"; break;
-        case "right": direction = "left"; break;
-    }
-}
-```
-
-#### **3. NPC_Vic.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\NPC_Vic.java`)
-
-**Modified speak() method:**
-```java
-public void speak() {
-    super.speak();
-
-    // Check if all dialogues are complete
-    if(dialogueComplete && !gp.quest.talkedToVic) {
-        gp.quest.completeTalkToVic();
-    }
-}
-```
-
-#### **4. NPC_Mike.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\NPC_Mike.java`)
-
-**Modified speak() method:**
-```java
-public void speak() {
-    gp.ui.currentDialouge = dialouges[0];
-    super.speak();
-
-    // Mike only has 1 dialogue, so complete after first talk if Vic quest is done
-    if(gp.quest.talkedToVic && !gp.quest.foundMike) {
-        gp.quest.completeFoundMike();
-    }
-}
-```
-
-#### **5. NPC_Ian.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\NPC_Ian.java`)
-
-**Modified speak() method:**
-```java
-public void speak() {
-    gp.ui.currentDialouge = dialouges[0];
-    super.speak();
-
-    // Check if all dialogues are complete and Mike quest is done
-    if(dialogueComplete && gp.quest.foundMike && !gp.quest.foundIan) {
-        gp.quest.completeFoundIan();
-    }
-}
-```
-
-#### **6. NPC_Liam.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\NPC_Liam.java`)
-
-**Modified speak() method:**
-```java
-public void speak() {
-    gp.ui.currentDialouge = dialouges[0];
-    super.speak();
-
-    // Check if all dialogues are complete and Ian quest is done
-    if(dialogueComplete && gp.quest.foundIan && !gp.quest.foundLiam) {
-        gp.quest.completeFoundLiam();
-    }
-}
-```
-
-#### **7. NPC_Miles.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\NPC_Miles.java`)
-
-**Modified speak() method:**
-```java
-public void speak() {
-    gp.ui.currentDialouge = dialouges[0];
-    super.speak();
-
-    // Check if all dialogues are complete and Liam quest is done
-    if(dialogueComplete && gp.quest.foundLiam && !gp.quest.foundMiles) {
-        gp.quest.completeFoundMiles();
-    }
-}
-```
-
-#### **8. NPC_John.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\NPC_John.java`)
-
-**Modified speak() method:**
-```java
-public void speak() {
-    gp.ui.currentDialouge = dialouges[0];
-    super.speak();
-
-    // Complete John quest when all dialogues are done and all friends are found
-    if(dialogueComplete && gp.quest.foundAllFriends && !gp.quest.foundJohn) {
-        gp.quest.completeFoundJohn();
-    }
-}
-```
-
-#### **9. Player.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\entity\Player.java`)
-
-**Added imports:**
-```java
-import object.OBJ_MilesDoor;
-```
-
-**Modified damageMonster() method (lines 397-417):**
-```java
-if(gp.monster[gp.currentMap][i].life <= 0) {
-    String monsterName = gp.monster[gp.currentMap][i].name;
-
-    if(monsterName.equals("Brian")) {
-        // BOSS CUTSCENE - Brian is too weak to fight, talks before dying
-        gp.ui.startBrianCutscene(gp.monster[gp.currentMap][i]);
-        // Complete Brian quest
-        if(!gp.quest.defeatedBrian) {
-            gp.quest.completeDefeatedBrian();
-        }
-    }
-    else {
-        gp.monster[gp.currentMap][i].dying = true;
-        gp.ui.addMessage("You killed " + monsterName + "!");
-        gp.ui.addMessage("Exp +" + gp.monster[gp.currentMap][i].exp);
-        exp += gp.monster[gp.currentMap][i].exp;
-        checkLevelUp();
-
-        // Complete Nick quest
-        if(monsterName.equals("Nick") && !gp.quest.defeatedNick) {
-            gp.quest.completeDefeatedNick();
-        }
-    }
-}
-```
-
-**Modified pickUpObject() method (lines 308-316):**
-```java
-else if(objectName.equals("Miles' Door")) {
-    OBJ_MilesDoor milesDoor = (OBJ_MilesDoor)gp.obj[gp.currentMap][i];
-    if(searchItemInInventory("Key") != 999 && gp.quest.canUnlockMilesDoor()) {
-        // Only unlock and remove door if quest is complete AND player has key
-        milesDoor.use(this);
-        gp.obj[gp.currentMap][i] = null;
-    } else {
-        // Show appropriate message based on quest status
-        milesDoor.interact();
-    }
-}
-```
-
-#### **10. UI.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\main\UI.java`)
-
-**Completely rewrote drawQuestTracker() method (lines 151-205):**
-```java
-public void drawQuestTracker() {
-    int x = gp.tileSize * 12;
-    int y = gp.tileSize / 2;
-    int width = gp.tileSize * 7;
-    int height = gp.tileSize * 5; // Increased height for friend list
-
-    drawSubWindow(x, y, width, height);
-
-    x += 25;
-    y += gp.tileSize - 10;
-
-    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 18f));
-    g2.drawString("QUEST: " + gp.quest.getQuestName(), x, y);
-
-    y += 35;
-    g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 16f));
-    g2.drawString(gp.quest.getCurrentObjective(), x, y);
-
-    y += 28;
-    g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 15f));
-
-    // Show different objectives based on quest stage
-    if(!gp.quest.foundAllFriends) {
-        // Show friend checklist
-        String vic = (gp.quest.talkedToVic ? "[X]" : "[ ]") + " Vic";
-        g2.drawString(vic, x, y);
-        y += 22;
-
-        String mike = (gp.quest.foundMike ? "[X]" : "[ ]") + " Mike";
-        g2.drawString(mike, x, y);
-        y += 22;
-
-        String ian = (gp.quest.foundIan ? "[X]" : "[ ]") + " Ian";
-        g2.drawString(ian, x, y);
-        y += 22;
-
-        String liam = (gp.quest.foundLiam ? "[X]" : "[ ]") + " Liam";
-        g2.drawString(liam, x, y);
-        y += 22;
-
-        String miles = (gp.quest.foundMiles ? "[X]" : "[ ]") + " Miles";
-        g2.drawString(miles, x, y);
-    } else if(!gp.quest.foundJohn) {
-        // John quest
-        String john = "[ ] Find John";
-        g2.drawString(john, x, y);
-    } else if(!gp.quest.defeatedNick) {
-        // Nick quest
-        String nick = "[ ] Defeat Nick";
-        g2.drawString(nick, x, y);
-    } else if(!gp.quest.defeatedBrian) {
-        // Brian quest
-        String brian = "[ ] Defeat Brian";
-        g2.drawString(brian, x, y);
-    } else {
-        // All complete!
-        g2.drawString("[X] All Quests Complete!", x, y);
-    }
-}
-```
-
-### Files Created
-
-#### **OBJ_MilesDoor.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\object\OBJ_MilesDoor.java`)
-
-**New special quest-locked door:**
-```java
-package object;
-
-import entity.Entity;
-import main.Gamepanel;
-
-public class OBJ_MilesDoor extends Entity {
-
-    Gamepanel gamePanel;
-
-    public OBJ_MilesDoor(Gamepanel gp) {
-        super(gp);
-        this.gamePanel = gp;
-
-        name = "Miles' Door";
-        down1 = setup("/objects/door", gp.tileSize, gp.tileSize);
-        collision = true;
-
-        solidArea.x = 0;
-        solidArea.y = 16;
-        solidArea.width = 48;
-        solidArea.height = 32;
-        solidAreaDefaultX = solidArea.x;
-        solidAreaDefaultY = solidArea.y;
-    }
-
-    public void interact() {
-        gamePanel.gameState = gamePanel.dialougeState;
-
-        if(!gamePanel.quest.foundLiam) {
-            gamePanel.ui.currentDialouge = "This door won't budge... \nMaybe I should find the others first.";
-        } else {
-            gamePanel.ui.currentDialouge = "It's locked! I need a key.";
-        }
-    }
-
-    public void use(Entity entity) {
-        gamePanel.gameState = gamePanel.dialougeState;
-
-        // Check if Liam quest is complete first
-        if(!gamePanel.quest.canUnlockMilesDoor()) {
-            gamePanel.ui.currentDialouge = "This door won't open yet... \nI should find the others first.";
-            // Don't consume the key or remove the door
-            return;
-        }
-
-        // Now check for key
-        int keyIndex = 999;
-        for(int i = 0; i < entity.inventory.size(); i++) {
-            if(entity.inventory.get(i).name.equals("Key")) {
-                keyIndex = i;
-                break;
-            }
-        }
-
-        if(keyIndex != 999) {
-            // Only remove key and allow door to be removed if quest is complete
-            entity.inventory.remove(keyIndex);
-            gamePanel.ui.currentDialouge = "Door Unlocked! \nMiles should be inside.";
-            gamePanel.playSE(5);
-            // Door will be removed by Player.pickUpObject after this returns
-        } else {
-            gamePanel.ui.currentDialouge = "You need a key to open this door!";
-        }
-    }
-}
-```
-
-#### **AssetSetter.java** (`C:\Users\Owner\Documents\Eclipse workspace\My2dgame\src\main\AssetSetter.java`)
-
-**Added import:**
-```java
-import object.OBJ_MilesDoor;
-```
-
-**Replaced door at (38, 12) with Miles' special door (lines 81-84):**
-```java
-// MILES' DOOR - Special quest-locked door
-gp.obj[mapNum][i] = new OBJ_MilesDoor(gp);
-gp.obj[mapNum][i].worldX = gp.tileSize * 38;
-gp.obj[mapNum][i].worldY = gp.tileSize * 12;
-i++;
-```
-
-### Quest System Features
-
-**Linear Progression:**
-- Player must complete quests in order
-- Cannot skip ahead
-- Quest tracker shows current objective
-
-**Dialogue Completion Tracking:**
-- NPCs track when all dialogues have been shown
-- Quest only completes after full conversation
-- Prevents accidental quest completion
-
-**Visual Feedback:**
-- On-screen messages for each quest update
-- Individual checkmarks for each friend found
-- Clear quest names that change as you progress
-
-**Quest-Locked Door:**
-- Miles' door cannot be opened until Liam quest is complete
-- Shows different messages based on quest progress
-- Door stays locked even with a key if quest isn't done
-- Prevents sequence breaking
-
-### Quest Tracker Display
-
-**Press P to view quest tracker showing:**
-
-**Quest 1: "Find all your friends"**
-- [ ] Vic
-- [ ] Mike
-- [ ] Ian
-- [ ] Liam
-- [ ] Miles
-
-**Quest 2: "Wait, Where's John?"**
-- [ ] Find John
-
-**Quest 3: "Kill Nick"**
-- [ ] Defeat Nick
-
-**Quest 4: "Kill Brian"**
-- [ ] Defeat Brian
-
-### NPC & Location Information
+**Overview:** A linear quest chain enforced through boolean flags in `Quest.java`, checked by each NPC's `speak()` and by boss-kill logic in `Player.damageMonster()`.
+
+**Chain:**
+1. **Find all your friends** — talk to 5 overworld NPCs, each requiring their *previous* friend's questline to be done before their own dialogue completion counts:
+   - Vic (11 dialogues, no prerequisite) → `talkedToVic`
+   - Mike (1 dialogue, needs `talkedToVic`) → `foundMike`
+   - Ian (12 dialogues, needs `foundMike`) → `foundIan`
+   - Liam (14 dialogues, needs `foundIan`) → `foundLiam` (also unlocks Miles' door)
+   - Miles (13 dialogues, needs `foundLiam`) → `foundMiles` → auto-completes `foundAllFriends`
+2. **Wait, Where's John?** — find John in the dungeon (7 dialogues, needs `foundAllFriends`) → `foundJohn`
+3. **Kill Nick** — defeat the mini-boss → `defeatedNick`
+4. **Kill Brian** — defeat the final boss → `defeatedBrian` → victory screen
+
+Each `NPC_*.speak()` override calls `super.speak()` (which advances the dialogue array and sets `dialogueComplete` once it runs out of lines) and then checks `dialogueComplete && <previous flag> && !<own flag>` before calling the matching `Quest.complete*()` method. Each `complete*()` method is idempotent (checks `!flag` before setting it) and pushes an on-screen message via `ui.addMessage()`.
+
+`Quest.getQuestName()` / `getCurrentObjective()` derive the current stage purely from which flags are still false — there's no separate "current stage" field to get out of sync.
+
+**Quest tracker (press P):** `UI.drawQuestTracker()` shows the quest name/objective, then a friend checklist while stage 1 is active, or a single "[ ] Find John" / "[ ] Defeat Nick" / "[ ] Defeat Brian" line for later stages.
+
+**Files:** `Quest.java`, `UI.java`, all `NPC_*.java`, `Player.java` (boss-kill hooks)
+
+---
+
+## Modification 4: Quest-Locked Doors
+
+Two doors block sequence-breaking, each a small `Entity` subclass with `interact()` (bump into it, no key) and `use()` (bump into it while holding a key):
+
+- **`OBJ_VicDoor`** at (23, 32) — refuses to open until `quest.talkedToVic`, even with a key. Message: *"Vic: HEY ASSHOLE GET THE FUCK OVER HERE!!!"*
+- **`OBJ_MilesDoor`** at (38, 12) — refuses to open until `quest.canUnlockMilesDoor()` (= `foundLiam`), even with a key. Message: *"HEY STUPID\nDID YOU READ THE QUEST LIST?!"*
+
+Both: if the quest gate isn't met, `use()` returns early without consuming the key or removing the door. `Player.pickUpObject()` special-cases both door names (matched by `.name.equals(...)`) to route to `door.use()`/`door.interact()` instead of the generic pickup path, and explicitly sets `gp.obj[...] = null` to remove the door only when `use()` actually unlocked it.
+
+Regular `OBJ_Door` has no quest gate — any key opens it, no dialogue prerequisite.
+
+**Files:** `OBJ_VicDoor.java`, `OBJ_MilesDoor.java` (created), `AssetSetter.java` (placement), `Player.java` (pickUpObject routing)
+
+---
+
+## Modification 5: Continuous Dialogue Flow
+
+**Problem:** Originally every dialogue line required closing and re-opening the dialogue box by re-walking into the NPC.
+
+**Solution:** `Gamepanel.currentNPC` tracks which NPC slot is currently being talked to (`999` = none). `Player.interactNPC()` sets it when dialogue starts. While in `dialougeState`, `KeyHandler.dialogueState()` calls `speak()` again on that same NPC each time ENTER is pressed, instead of leaving dialogue state. `Entity.speak()` advances through the `dialouges[]` array and, once it runs past the last line, sets `dialogueComplete = true`, resets `currentNPC` to `999`, and flips `gameState` back to `playState` automatically.
+
+**Files:** `Gamepanel.java`, `Player.java`, `KeyHandler.java`, `Entity.java`
+
+---
+
+## Modification 6: Cutscene System
+
+A generalized cutscene player was added to `UI.java`, replacing what earlier notes called a Brian-specific "`startBrianCutscene`" — that method name never shipped; the actual implementation is type-generic from the start.
+
+- `UI.startCutscene(String[] lines, int type, Entity monster)` — begins a cutscene: sets `cutsceneActive`, stores the line array + a `cutsceneType` tag + an optional related monster, shows line 0, switches to `dialougeState`.
+- `UI.advanceCutscene()` — called from `KeyHandler.dialogueState()` on ENTER whenever `cutsceneActive` is true (checked *before* the normal NPC-dialogue branch). Steps to the next line, or on the last line runs type-specific end behavior:
+  - `CUTSCENE_BRIAN_DEATH` (1): sets the boss `dying = true`, switches to `victoryState`, starts the looping victory theme (sound 19).
+  - `CUTSCENE_NICK_INTRO` (2): just returns to `playState`.
+  - Any other/default type: returns to `playState`.
+
+**Two cutscenes exist today:**
+- **Nick intro** (`EventHandler.nickIntro()`) — fires once, the first time the player crosses a 3-tile-wide trigger strip at the entrance to Nick's dungeon room (checked via `quest.metNick`, which is saved so it won't refire after a reload).
+- **Brian death** (`Player.damageMonster()`) — when Brian's HP hits 0, instead of the normal death flow he gets a multi-line "confession" cutscene explaining the rat-monster backstory, and only *then* dies and completes the quest.
+
+**Files:** `UI.java`, `KeyHandler.java`, `EventHandler.java`, `Player.java`, `Quest.java` (`metNick` flag)
+
+---
+
+## Modification 7: Boss AI & Combat Detail
+
+Both bosses use tile-distance-based state machines in `setAction()` (approach / retreat / strafe / ranged-attack bands), distinct from the simple chase-or-wander AI on regular monsters (`MON_Tuchi`, `MON_Armored_Tuchi`, `MON_Kunt_Krab`).
+
+- **`MON_Nick`** (mini-boss, 50 HP): shoots `OBJ_Milkshot` projectiles at medium range, retreats if the player gets within 3 tiles, approaches if too far. `damageReaction()` additionally makes him retreat once his HP drops below a third. Drops a key on death (`checkDrop()`), which opens the door to Brian's arena.
+- **`MON_Brian`** (final boss, 40 HP, 4x sprite size): shoots `OBJ_Titmilk` projectiles (heavy-hitter) in a medium band, strafes when the player is adjacent, approaches when far. Every `POOP_INTERVAL` (600 update ticks, ~10s) while a fight is engaged (player within 12 tiles), `poopTuchi()` spawns a fresh `MON_Tuchi` behind him — capped at 3 nearby tuchis at once, and it won't spawn one inside a wall tile. Drops random loot on death.
+- **`heavyHitter`** (flag on `Entity`, checked in `damagePlayer()`): a heavy-hitter's damage only gets halved (not fully absorbed) by the player's defense, and always deals at least 1 — armored/boss enemies punch through shields instead of being walled off by them entirely.
+- Damage sounds are picked once per hit in `Player.damageMonster()`: Brian has his own hit sound (17) and death sound (18, replacing the normal hit sound on the killing blow, with music stopped so it rings out alone); everyone else uses the shared hit sound (7).
+
+**Files:** `MON_Nick.java`, `MON_Brian.java`, `Entity.java` (`heavyHitter`, `damagePlayer`), `Player.java` (`damageMonster`)
+
+---
+
+## Modification 8: Idle NPC Dialogue Bubbles
+
+Every named NPC (`NPC_Ian`, `NPC_John`, `NPC_Josh`, `NPC_Liam`, `NPC_Mike`, `NPC_Miles`, `NPC_Vic`) has a 12-line `idleDialogues[]` array of ambient one-liners, independent of their main quest dialogue. In `setAction()`, when not currently mid-conversation, each NPC runs a random timer (roughly every 4–5 seconds, per-NPC odds ~30–45%) that pops a random idle line into a speech bubble above their head for ~3 seconds. Drawn by `Entity.drawDialogueBubble()` — a rounded black box with a white border and a small triangle pointer, positioned above the sprite, drawn after the invincibility-flicker alpha is restored so it's never faded out.
+
+**Files:** `Entity.java` (`drawDialogueBubble`, idle-dialogue fields), all `NPC_*.java`
+
+---
+
+## Modification 9: Save / Load System
+
+Single-slot save to `save.dat` via Java object serialization.
+
+- **`DataStorage`** (`Serializable`) is a flat bag of everything worth persisting: player stats, position, current map, inventory (by item name only — see below), and every `Quest` flag, plus per-map object state (name/position for every object slot on every map, plus opened/loot for chests).
+- **`SaveLoad.save()`** walks `gp.player`, `gp.quest`, and every `gp.obj[map][i]` and fills a `DataStorage`, then serializes it.
+- **`SaveLoad.load()`** deserializes, restores player stats/position/quest flags, rebuilds the inventory by looking up each saved item name through `getObject(String)` (a name→`new OBJ_*` switch — inventory items are **not** serialized directly, just re-constructed from their name, which is why equipping is restored by *slot index* (`currentWeaponSlot`/`currentShieldSlot`) rather than identity), then re-runs `AssetSetter.setNPC()`/`setMonster()` (NPCs/monsters always respawn at their default spots — only objects and quest state persist) before rebuilding every map's object layout from the saved names/positions. Chest `opened` state and remaining loot are restored the same way. Older saves with fewer object slots than the current build are handled by only reading `min(current slots, saved slots)`.
+- Reachable from the title screen ("Load Game") and from the pause/options menu ("Save Game").
+
+**Files:** `SaveLoad.java`, `DataStorage.java`, `KeyHandler.java` (title/options hooks), `UI.java` (options menu save trigger)
+
+---
+
+## Modification 10: Josh's Hut (Map 2)
+
+A third map was added: Josh's hut interior, loaded from `res/maps/hutmap.txt`. Stepping onto the hut tile on the overworld (11, 30) teleports the player inside (25, 26); stepping on the door tile inside (25, 28) teleports back out to (11, 31). Josh appears here as a second placement (he's also in the dungeon, at (42, 34) on Map 1) acting as a merchant with the same trade inventory (Beer, Jimmy's Ass, Hot Burg, Ian's Sword, a purchasable Key).
+
+**Files:** `TileManager.java` (loads `hutmap.txt` as map 2), `EventHandler.java` (teleport triggers), `AssetSetter.java` (Josh spawn in map 2), `res/maps/hutmap.txt`
+
+---
+
+## Modification 11: "PC Mode" (sanitized-dialogue toggle)
+
+An opt-in setting that swaps the game's raunchy text for a uniformly flat, over-corrected corporate/HR-euphemism voice — an ironic "family friendly" mode. The joke is that every character starts sounding like the same nervous compliance memo, regardless of who they are; the mechanic never touches gameplay, only what's displayed.
+
+### Toggle & persistence
+
+- **`Gamepanel.pcMode`** (boolean, default `false`) is the single source of truth, checked live wherever text is drawn — no restart required, unlike Full Screen.
+- New **"PC Mode"** row in the Options menu, directly under "Full Screen", toggled with ENTER exactly like a checkbox (fills in the same square-checkbox UI Full Screen uses, drawn just below it). All the other rows below it (Music, Sound EF, Controls, Save Game, Fuck Off, Back) shifted down one `commandNum` slot to make room, and the Options subwindow grew by one tile-row (`frameHeight` 10→11 tiles, `frameY` nudged up half a tile) since the original layout had zero pixels of spare margin before "Back".
+- **Post-playtest fix:** the gap before "Back" was originally `tileSize*2` (double every other row's spacing), which put its baseline exactly on the subwindow's bottom edge (552px, with `frameY=24` + `frameHeight=528`) — visually spilling past the frame border. Changed to a single `tileSize` gap like every other row, landing "Back" at 504px, 48px clear of the bottom edge. Fixed and confirmed working in-game.
+- Persisted as a 4th line in `config.txt` (`on`/`off`, same convention as Full Screen), read/written by `Config.java`. Old 3-line config files load fine — the missing line just leaves `pcMode` at its in-memory default (`false`), same fallback behavior the existing Music/SE fields already had for a totally missing file.
+
+### The lookup mechanism
+
+**`main.PcText.pick(Gamepanel gp, String original, String pc)`** — a single static helper used everywhere. Returns `pc` if `gp.pcMode` is true *and* `pc` is non-null/non-empty; otherwise falls back to `original`. This means a line that's already inoffensive never needs a PC-mode duplicate authored — its `pc` slot is simply left unset (`null`/`""`) and `pick()` quietly falls through. (A few lines were written as literal duplicates anyway rather than left null — harmless, just slightly more verbose than necessary.)
+
+For content that's a whole array rather than one string (cutscene line lists, the victory-screen paragraph, the title-screen menu labels), the same idea is done manually with a `gp.pcMode ? pcArray : originalArray` ternary at the point of use, since `PcText.pick()` only handles single strings.
+
+**One firm rule:** an `Entity`'s `name` field is *never* touched by PC mode. `name` is used throughout the codebase as a stable identity key — inventory lookups (`searchItemInInventory`), door/chest routing in `Player.pickUpObject()`, boss-kill checks (`monsterName.equals("Brian")`), and the whole `SaveLoad`/`DataStorage` save-file format all switch on exact `name` strings. Renaming an item or NPC's `name` under PC mode would silently break saves and pickup/quest logic the moment the toggle changed. Only *displayed* text — descriptions, dialogue, system messages — is swapped.
+
+### What's covered
+
+| Area | Mechanism | Coverage |
+|---|---|---|
+| Item descriptions | `Entity.pcDescription` field (parallel to `description`), read via `PcText.pick()` in `UI.drawInventory()`'s item-detail popup | Beer, Bloat, Box Cutter, Ian's Sword, Jimmy's Ass, Rat Spray, Hot Burg, Rat Tail (Key's description was already clean, left as-is) |
+| Consumable-use flavor text | `PcText.pick()` inline at the `currentDialouge =` assignment in `use()` | Beer, Rat Tail |
+| Door/chest messages | `PcText.pick()` inline | `OBJ_VicDoor`, `OBJ_MilesDoor` (the profane lines); `OBJ_Door`/`OBJ_Chest` needed no changes — their messages were already clean |
+| Environmental messages | `PcText.pick()` inline | The damage-pit message in `EventHandler.damagePit()` |
+| Cutscenes | Parallel `nickCutscenePc`/`brianCutscenePc` arrays on `UI`, same line count/order as the originals, selected via ternary at the two `startCutscene()` call sites (`EventHandler.nickIntro()`, `Player.damageMonster()`) | Both cutscenes, full rewrite, 6 and 10 lines respectively |
+| System/menu text | `gp.pcMode ? ... : ...` ternary inline | Victory screen ("You beat the game!" body text + "Thanks for wasting your time" line), Game Over screen title ("You Suck!" → "Nice Try!"), the full-screen-restart notice, the title-screen and options-menu "Fuck Off" labels (→ "Exit Kindly", picked to be short enough it doesn't overflow the title screen's fixed-width menu columns) |
+| NPC quest dialogue | `Entity.pcDialouges[]` (parallel to `dialouges[]`, same index), picked inside the shared `Entity.speak()` | All 7 NPCs, full line-for-line rewrite (Vic 11, Mike 1, Ian 12, Liam 14, Miles 13, John 7, Josh 1 — 59 lines total) |
+| NPC idle bubbles | A per-NPC `idlePcDialogues[]` field (parallel to `idleDialogues[]`), picked at the point each NPC rolls a random idle line in `setAction()` | All 7 NPCs × 12 lines = 84 lines total |
+| Item **names** (not just descriptions) | `Entity.pcName` field (parallel to `pcDescription`), plus `Entity.getDisplayName(gp)` helper; picked inline via `PcText.pick(gp, name, pcName)` at every draw site | Only the two names that are actually profane — `"$Fartcoin"` → `"$FlatuCoin"`, `"Jimmy's Big Fat Ass"` → `"Jimmy's Generous Donation"`. Already-clean names (Beer, Rat Tail, Box Cutter, Hot Burg, Ian's Sword, Bloat, Rat Spray) were deliberately left alone — their crude humor lives only in descriptions, which was already covered above. |
+| Monster **name** | Same `Entity.pcName`/`getDisplayName(gp)` mechanism | `MON_Kunt_Krab`: `"a Kunt Krab"` → `"a Kitty Krab"` in the "You killed ...!" kill message (`Player.damageMonster()`). The identity string used for boss-kill routing (`monsterName.equals("Brian")`/`"Nick"`) is untouched — only the display call at the kill-message line was swapped to `getDisplayName(gp)`. |
+| Level-up message | `gp.pcMode ? ... : ...` ternary inline in `Player.checkLevelUp()` (a spot the original coverage sweep missed) | `"Your dumbass reached level X\nGood job idiot!"` → `"Great job! You reached level X!\nYou are so good at this game!"` |
+
+Menu *labels* that aren't jokes (Options, Music, Controls, item names, etc.) were left untouched — only the parts that were actually part of the game's crude voice got a PC rewrite.
+
+**`name` vs `pcName`:** exactly like `pcDialouges`/`pcDescription`, `pcName` is purely cosmetic — every identity path (`SaveLoad`'s name→object `switch`, the `item.name.equals("$Fartcoin")` currency check in `UI.pickUpObject`-adjacent chest logic, `Player.pickUpObject()` door/chest routing) still switches on the real `name` field, untouched. Display sites updated to go through `pcName`: `UI`'s "Obtained X!" message, the chest-currency pickup message, `OBJ_Fart_Coin.use()`'s pickup message, both trade-window `$FartCoin:`/`$FlatuCoin:` balance labels, the character-screen `$fartcoin`/`$flatucoin` stat label, and the "Not enough Fartcoins."/"Not enough FlatuCoins." shop error. `OBJ_Jimmysass`'s `pcDescription` now interpolates `pcName` instead of the raw profane `name` in its bracketed header.
+
+### Verification approach
+
+The game can't be driven headlessly in this environment (no display for the Swing window, no synthetic key events), so testing combined:
+- A full-project `javac` compile after every batch of changes.
+- A standalone reimplementation of `Config.save()`/`load()`'s exact logic, run against throwaway files, covering: full round-trip with PC Mode on/off, an old 3-line config file loading safely with PC Mode defaulting correctly, and a missing config file not crashing.
+- A standalone mirror of the Options-menu `commandNum` navigation math, confirming all 8 rows wrap correctly in both directions and that every row index used elsewhere (the "Controls" and "Fuck Off" back-navigation resets) still lands on the right label.
+- Pixel-math verification (via a small Python calculation, not a screenshot) that the taller Options subwindow still fits inside the 576px screen height and that the new "Exit Kindly" label doesn't run past the title screen's right edge.
+- A regression script scanning every PC-branch string in the source (all `PcText.pick()` second arguments, every `pcDescription`/`pcDialouges`/`idlePcDialogues` value, every `pcMode ?` ternary branch) against a profanity/slur wordlist — confirmed clean across all ~185 PC-mode lines written.
+- A second regression script confirming no original/PC pair was accidentally left identical (which would silently mean "PC mode do nothing" for that line) — the only matches found were lines that were legitimately already clean before PC mode existed, which is correct, not a bug.
+- An index-alignment script confirming every `dialouges[i]`/`idleDialogues[i]` has a same-indexed `pcDialouges[i]`/`idlePcDialogues[i]` (and vice versa) for all 7 NPCs, and that the two cutscene arrays have matching line counts (6 and 10) — a silent off-by-one here would show the wrong PC line, or an array-index exception if the PC array were shorter.
+
+**Files:** `main/PcText.java` (new), `main/Gamepanel.java` (`pcMode` field), `main/Config.java` (persistence), `main/UI.java` (Options menu row + layout resize, cutscene arrays, victory/game-over/title/fullscreen-notice text, item-name display sites), `main/EventHandler.java` (pit message, Nick cutscene selection), `entity/Entity.java` (`pcDescription`, `pcDialouges[]`, `pcName`, `getDisplayName()`, `speak()` lookup), `entity/Player.java` (Brian cutscene selection, monster kill-message display, level-up message), all 7 `NPC_*.java` (`idlePcDialogues[]` + content), `object/OBJ_Beer.java`, `object/OBJ_Rattail.java`, `object/OBJ_VicDoor.java`, `object/OBJ_MilesDoor.java`, `object/OBJ_Fart_Coin.java` (`pcName`, pickup message), `object/OBJ_Jimmysass.java` (`pcName`, `pcDescription` fix), `monster/MON_Kunt_Krab.java` (`pcName`), plus `pcDescription` content in `OBJ_Bloat.java`, `OBJ_Boxcutter.java`, `OBJ_Dildo_Sword.java`, `OBJ_Spicyburger.java`, `OBJ_Spray_Normal.java`
+
+### Status: playtested, dialogue confirmed working
+
+In-game playtest confirmed all dialogue (NPC quest lines, idle bubbles, item descriptions, etc.) works as expected under PC Mode. One layout bug was found and fixed (see the pause-menu "Back" button note above). Remaining next-session TODO items below are still open.
+
+**One Eclipse gotcha hit while wrapping up this session, worth remembering:** a brand-new source file (`PcText.java`) created directly on disk didn't get picked up by Eclipse's workspace model — every other class recompiled fine on Clean/Build, but `PcText.class` was silently never produced, which surfaced as "main.PcText.pick cannot be resolved" everywhere it's called. Fix was a plain **Refresh (F5)** on the project *before* Clean/Build — Clean/Build alone isn't enough when a file appeared outside Eclipse's own editor.
+
+### Next session TODO
+- [x] **Playtest PC Mode in-game.** Dialogue confirmed working as expected.
+- [x] Pause menu "Back" button spilling past the frame border — fixed, see above.
+- [x] Item name PC rewrites (`$Fartcoin`/Jimmy's Ass) implemented — compiled clean, not yet playtested.
+- [x] Monster name PC rewrite (`Kunt Krab` → `Kitty Krab`) implemented — compiled clean, not yet playtested.
+- [ ] **Playtest the new item-name PC rewrites specifically:** pick up a Fartcoin (world + chest) and check the pickup message/HUD balance/character-screen label all show "FlatuCoin" under PC Mode; buy/sell at Josh's shop and check the price window + "Not enough FlatuCoins." error; view Jimmy's Ass's item-detail popup under PC Mode and confirm the bracketed header shows "Jimmy's Generous Donation" not the original name.
+- [ ] **Playtest the Kunt Krab rename:** kill one under PC Mode and confirm the kill message reads "You killed a Kitty Krab!" not the original name.
+- [x] Level-up message PC rewrite implemented — compiled clean, not yet playtested.
+- [ ] Confirm config.txt round-trips correctly from the real game (quit after toggling PC Mode on, relaunch, check it's still on) — logic was verified with a standalone harness but never through the actual `Main`/`Config` path.
+- [ ] If anything reads awkwardly in-game (line wrapping in the dialogue box, a line running past the item-description subwindow, etc.), that's a real find the static checks couldn't catch — the dialogue/description boxes wrap on `\n` you place manually, so a rewritten line with different length than the original could sit differently even if it's under the same character-ish budget.
+- [ ] Optional: extend PC Mode coverage to anything found in step 1 that got missed (see the Future Enhancement Ideas note on this).
+
+---
+
+## NPC & Location Reference
 
 **Overworld NPCs (Map 0):**
-- Vic (22, 22) - 11 dialogues
-- Mike (3, 34) - 1 dialogue
-- Ian (17, 6) - 12 dialogues
-- Liam (30, 45) - 14 dialogues
-- Miles (38, 4) - 13 dialogues (behind locked door at 38, 12)
+| NPC | Position | Dialogues | Gate |
+|---|---|---|---|
+| Vic | (22, 22) | 11 | — |
+| Mike | (3, 34) | 1 | `talkedToVic` |
+| Ian | (17, 6) | 12 | `foundMike` |
+| Liam | (30, 45) | 14 | `foundIan` |
+| Miles | (38, 4), behind locked door at (38, 12) | 13 | `foundLiam` |
 
 **Dungeon NPCs (Map 1):**
-- John (5, 41) - 7 dialogues (first cell)
-- Josh (42, 34) - Merchant
+| NPC | Position | Role |
+|---|---|---|
+| John | (5, 41) | Captive, first cell, 7 dialogues |
+| Josh | (42, 34) | Merchant |
 
-**Boss Locations (Map 1):**
-- Nick (9, 29) - Mini-boss, drops key
-- Brian (22, 8) - Final boss
+**Josh's Hut (Map 2):**
+| NPC | Position | Role |
+|---|---|---|
+| Josh | (25, 22) | Merchant (same stock as dungeon Josh) |
 
----
+**Bosses (Map 1):**
+| Monster | Position | Notes |
+|---|---|---|
+| Nick | (9, 29) | Mini-boss, ranged, drops key, triggers intro cutscene on approach |
+| Brian | (22, 8) | Final boss, 4x size, ranged + spawns tuchis, death cutscene → victory |
 
-## Summary of All Modifications
-
-### Total Files Modified: 13
-1. Gamepanel.java - Camera clamping methods
-2. TileManager.java - Camera-aware rendering
-3. Entity.java - Camera rendering + dialogue tracking
-4. Player.java - Camera rendering, weapon sounds, quest integration, Miles' door handling
-5. Quest.java - Complete quest system rewrite
-6. UI.java - Dynamic quest tracker display
-7. NPC_Vic.java - Quest completion trigger
-8. NPC_Mike.java - Quest completion trigger
-9. NPC_Ian.java - Quest completion trigger
-10. NPC_Liam.java - Quest completion trigger
-11. NPC_Miles.java - Quest completion trigger
-12. NPC_John.java - Quest completion trigger
-13. AssetSetter.java - Miles' door placement
-
-### Total Files Created: 1
-1. OBJ_MilesDoor.java - Quest-locked door
-
-### Key Features Added
-✅ Camera edge clamping (no black borders)
-✅ Weapon-specific sound effects
-✅ Progressive quest system with 4 stages
-✅ Individual friend tracking with checkmarks
-✅ Dialogue completion detection
-✅ Quest-locked door mechanic
-✅ Boss defeat quest integration
-✅ Dynamic quest tracker UI
-
-### Testing Checklist
-- [X] Camera doesn't show black at map edges
-- [X] Jimmy's Ass plays fart sound
-- [X] Quest progression enforces order (Vic → Mike → Ian → Liam → Miles)
-- [X] Miles' door locked until Liam quest complete
-- [X] Miles' door shows quest-specific messages
-- [X] Friend checklist displays correctly
-- [X] John quest triggers after finding Miles
-- [X] Nick quest triggers after finding John
-- [X] Brian quest triggers after defeating Nick
-- [X] Victory triggers after defeating Brian
+**Map transitions (`EventHandler`):**
+- Overworld (48, 5) any direction → Dungeon entrance hallway (5, 47)
+- Dungeon (2, 47) any direction → Overworld stairs (47, 5)
+- Overworld (11, 30) → Josh's Hut (25, 26)
+- Josh's Hut (25, 28) → Overworld (11, 31)
+- Two damage-pit trigger tiles on the overworld: (28, 31) facing up, (13, 23) any direction — each deals 1 damage and shows a message
+- Dungeon (14, 29)/(14, 30)/(14, 31), any direction — one-time Nick intro cutscene trigger
 
 ---
 
-## Development Notes
+## Known Issues / Loose Ends
 
-### Compilation
-All files must be compiled to the `bin` directory:
+- **`OBJ_Door.use()` never sets `collision = false`** after unlocking, unlike `OBJ_VicDoor`, `OBJ_MilesDoor`, and `OBJ_Chest`, which all do. A regular door may stay solid after being "unlocked" even though `Player.pickUpObject()` nulls out the object reference on the same call (masking the bug in the common case, but the entity itself is still inconsistent with the others).
+- **`src/main/window.java`** is an empty file — dead, unused.
+- **`src/object/Pest.java`** and **`src/object/OBJ_Pest.java`** are near-duplicate unused classes, both incorrectly named `"Key"` internally; nothing in `AssetSetter` spawns either.
+- **`res/maps/map.txt`** (12 lines) is an unused leftover — the three loaded maps are `world.txt`, `dundgonmap.txt`, and `hutmap.txt`.
+- **`res/npc/New Piskel-1.png(3).png`** and **`res/player/Theo-1.png.png`** look like raw export/scratch files, not referenced by any `setup("/…")` call.
+
+---
+
+## Important Constants Cheat Sheet
+
+- `type_ass = 9` (Jimmy's Ass weapon type); other weapon types: `type_spray=3`, `type_cutter=4`, `type_dildo=8`
+- Sound effects: 4=pickup/use, 5=unlock, 6=spray/milkshot fire, 7=hit monster, 8=hit player, 9=level up, 10=cursor, 11=puke/shoot, 12=coin, 13/3=die, 14=transition, 15=dungeon music, 16=fart blast, 17=Brian hit, 18=Brian dies, 19=victory theme
+- Map 0 = Overworld, Map 1 = Dungeon, Map 2 = Josh's Hut
+- `currentNPC = 999` means no NPC is being talked to; the same `999` sentinel is reused for "no index found" in `CollisionChecker` and inventory search
+- `heavyHitter = true` on: Armored Tuchi, Kunt Krab, Brian, Brian's Titmilk projectile (Nick is NOT a heavy hitter)
+
+---
+
+## Compilation & Workflow
+
 ```bash
 cd "C:\Users\Owner\Documents\Eclipse workspace\My2dgame"
 javac -d bin -cp bin src/path/to/File.java
 ```
 
-### Eclipse Workflow
-1. After modifying files, refresh project (F5)
-2. Clean project (Project → Clean)
-3. Eclipse auto-builds
-4. If issues persist, manually compile via command line
-
-### Important Constants
-- `type_ass = 9` (Jimmy's Ass weapon type)
-- Sound effect 6 = spray sound
-- Sound effect 16 = fart blast
-- Map 0 = Overworld
-- Map 1 = Dungeon
+Eclipse workflow: modify → refresh project (F5) → Clean (Project → Clean) → Eclipse auto-builds. Fall back to manual `javac` if issues persist.
 
 ---
 
 ## Future Enhancement Ideas
-- Save/load quest progress
-- Optional side quests
-- Quest rewards (items, XP bonuses)
-- Quest journal with full history
-- Multiple quest-locked doors
+
+- Optional side quests / quest rewards (items, XP bonuses)
+- Quest journal with full history, quest markers on map
+- Multiple save slots
+- Fix the `OBJ_Door` collision bug noted above
+- Clean up dead files (`window.java`, `Pest.java`/`OBJ_Pest.java`, `map.txt`, stray export PNGs)
+- Dialogue skip/fast-forward option
 - Achievement system tied to quests
+- PC Mode: extend to any remaining flavor text found later (only the areas listed in Modification 11's coverage table were touched — a fresh grep for profanity across `src/` is the fastest way to check for stragglers before assuming coverage is total)

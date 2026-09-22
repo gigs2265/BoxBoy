@@ -6,6 +6,7 @@ import main.Gamepanel;
 public class NPC_Mike extends Entity{
 	
 	String[] idleDialogues = new String[12];
+	String[] idlePcDialogues = new String[12]; // "PC Mode" sanitized idle bubbles, same indices - see main.PcText
 	
 	public NPC_Mike(Gamepanel gp) {
 		super(gp);
@@ -31,6 +32,7 @@ public class NPC_Mike extends Entity{
 	
 	public void setDialouge() {
 		dialouges[0] = "Oh daddy *smooch*";
+		pcDialouges[0] = "Wonderful to see you! *friendly wave*";
 	}
 	
 	public void setIdleDialogues() {
@@ -46,6 +48,19 @@ public class NPC_Mike extends Entity{
 		idleDialogues[9] = "*blush*";
 		idleDialogues[10] = "Mwah mwah!";
 		idleDialogues[11] = "I need dick and cigs...";
+
+		idlePcDialogues[0] = "*friendly wave*";
+		idlePcDialogues[1] = "Jimmy?";
+		idlePcDialogues[2] = "Hello there!";
+		idlePcDialogues[3] = "*cheerful noises*";
+		idlePcDialogues[4] = "Did I put sunblock on my head before I left?";
+		idlePcDialogues[5] = "*giggle*";
+		idlePcDialogues[6] = "Hehe...";
+		idlePcDialogues[7] = "*wink*";
+		idlePcDialogues[8] = "Tee hee!";
+		idlePcDialogues[9] = "*blush*";
+		idlePcDialogues[10] = "Take care!";
+		idlePcDialogues[11] = "I need companionship and cigarettes...";
 	}
 	
 	public void setAction() {
@@ -67,7 +82,8 @@ public class NPC_Mike extends Entity{
 			if(idleDialogueTimer > 260) {
 				Random random = new Random();
 				if(random.nextInt(100) < 45) {
-					idleDialogue = idleDialogues[random.nextInt(idleDialogues.length)];
+					int idleIndex = random.nextInt(idleDialogues.length);
+					idleDialogue = main.PcText.pick(gp, idleDialogues[idleIndex], idlePcDialogues[idleIndex]);
 					showIdleDialogue = true;
 					idleDialogueTimer = 0;
 				} else { idleDialogueTimer = 0; }

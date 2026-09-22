@@ -92,7 +92,9 @@ public class EventHandler {
 
     public void damagePit(int gameState) {
         gp.gameState = gameState;
-        gp.ui.currentDialouge = "FUCK! THAT HURTS...I need a Beer.";
+        gp.ui.currentDialouge = PcText.pick(gp,
+            "FUCK! THAT HURTS...I need a Beer.",
+            "Ouch! That was uncomfortable. \nA beverage would be nice.");
         gp.player.life -= 1;
         canTouchEvent = false;
     }
@@ -116,7 +118,8 @@ public class EventHandler {
     public void nickIntro() {
         if(gp.quest.metNick == false && gp.quest.defeatedNick == false) {
             gp.quest.metNick = true;
-            gp.ui.startCutscene(gp.ui.nickCutscene, gp.ui.CUTSCENE_NICK_INTRO, null);
+            String[] lines = gp.pcMode ? gp.ui.nickCutscenePc : gp.ui.nickCutscene;
+            gp.ui.startCutscene(lines, gp.ui.CUTSCENE_NICK_INTRO, null);
         }
     }
 }

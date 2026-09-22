@@ -2,6 +2,7 @@ package object;
 
 import entity.Entity;
 import main.Gamepanel;
+import main.PcText;
 
 public class OBJ_VicDoor extends Entity {
 
@@ -27,7 +28,9 @@ public class OBJ_VicDoor extends Entity {
 		gamePanel.gameState = gamePanel.dialougeState;
 
 		if(!gamePanel.quest.talkedToVic) {
-			gamePanel.ui.currentDialouge = "Vic: HEY ASSHOLE GET THE FUCK OVER HERE!!!";
+			gamePanel.ui.currentDialouge = PcText.pick(gamePanel,
+				"Vic: HEY ASSHOLE GET THE FUCK OVER HERE!!!",
+				"Vic: Excuse me! Could I please have a \nmoment of your time over here?");
 		} else {
 			gamePanel.ui.currentDialouge = "It's locked! I need a key.";
 		}
@@ -38,7 +41,9 @@ public class OBJ_VicDoor extends Entity {
 
 		// Check if Vic dialogue is complete first
 		if(!gamePanel.quest.talkedToVic) {
-			gamePanel.ui.currentDialouge = "Vic: HEY ASSHOLE GET THE FUCK OVER HERE!!!";
+			gamePanel.ui.currentDialouge = PcText.pick(gamePanel,
+				"Vic: HEY ASSHOLE GET THE FUCK OVER HERE!!!",
+				"Vic: Excuse me! Could I please have a \nmoment of your time over here?");
 			// Don't consume the key or remove the door
 			return;
 		}

@@ -200,7 +200,7 @@ public class KeyHandler implements KeyListener {
         
         int maxCommandNum = 0;
         switch(gp.ui.subState) {
-            case 0: maxCommandNum = 6; break;
+            case 0: maxCommandNum = 7; break;
             case 3: maxCommandNum = 1; break;
         }
         
@@ -222,27 +222,27 @@ public class KeyHandler implements KeyListener {
         
         if(code == KeyEvent.VK_A) {
             if(gp.ui.subState == 0) {
-                if (gp.ui.commandNum == 1 && gp.music.volumeScale > 0) {
+                if (gp.ui.commandNum == 2 && gp.music.volumeScale > 0) {
                     gp.music.volumeScale--;
                     gp.music.checkVolume();
                     gp.playSE(10);
                 }
-                if (gp.ui.commandNum == 2 && gp.se.volumeScale > 0) {
-                    gp.se.volumeScale--;                
+                if (gp.ui.commandNum == 3 && gp.se.volumeScale > 0) {
+                    gp.se.volumeScale--;
                     gp.playSE(10);
                 }
             }
         }
-        
+
         if(code == KeyEvent.VK_D) {
             if(gp.ui.subState == 0) {
-                if (gp.ui.commandNum == 1 && gp.music.volumeScale < 5) {
+                if (gp.ui.commandNum == 2 && gp.music.volumeScale < 5) {
                     gp.music.volumeScale++;
                     gp.music.checkVolume();
                     gp.playSE(10);
                 }
-                if (gp.ui.commandNum == 2 && gp.se.volumeScale < 5) {
-                    gp.se.volumeScale++;                
+                if (gp.ui.commandNum == 3 && gp.se.volumeScale < 5) {
+                    gp.se.volumeScale++;
                     gp.playSE(10);
                 }
             }

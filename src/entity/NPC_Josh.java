@@ -10,6 +10,7 @@ import object.OBJ_Spicyburger;
 public class NPC_Josh extends Entity {
 	
 	String[] idleDialogues = new String[12];
+	String[] idlePcDialogues = new String[12]; // "PC Mode" sanitized idle bubbles, same indices - see main.PcText
 	
 	public NPC_Josh(Gamepanel gp) {
 	    super(gp);
@@ -36,6 +37,8 @@ public class NPC_Josh extends Entity {
 	
 	public void setDialouge() {
 		dialouges[0] = "IM NO SURE WHO I LOVE MORE, JESUS OR BRIA...\nOh hey there! Im assuming your here for conversion?\nI have some stuff you might want to buy.\nAll proceeds go to the 'Talks with Brian Outside Foundation'";
+
+		pcDialouges[0] = "I HAVE GREAT ADMIRATION FOR BOTH JESUS AND BRIA...\nOh, hello there! I imagine you're interested in \nsome fellowship? I have some items available for \npurchase. All proceeds support the 'Community \nConversations with Brian Foundation'";
 	}
 	
 	public void setIdleDialogues() {
@@ -51,6 +54,19 @@ public class NPC_Josh extends Entity {
 		idleDialogues[9] = "Business is slow...";
 		idleDialogues[10] = "Jesus or Brian?";
 		idleDialogues[11] = "Foundation needs funds...";
+
+		idlePcDialogues[0] = "Brian appreciates you!";
+		idlePcDialogues[1] = "Wonderful day!";
+		idlePcDialogues[2] = "Hmm...";
+		idlePcDialogues[3] = "Where's Community Leader Brian?";
+		idlePcDialogues[4] = "Another day, another walk with Brian";
+		idlePcDialogues[5] = "Need supplies?";
+		idlePcDialogues[6] = "Brian is a wonderful leader!";
+		idlePcDialogues[7] = "Connor should really finish tidying up soon";
+		idlePcDialogues[8] = "*sigh*";
+		idlePcDialogues[9] = "Business is a bit slow...";
+		idlePcDialogues[10] = "Jesus or Brian? Both, really!";
+		idlePcDialogues[11] = "Foundation could use some donations...";
 	}
 	
 	public void setItems() {
@@ -84,7 +100,8 @@ public class NPC_Josh extends Entity {
 			if(idleDialogueTimer > 300) {
 				Random random = new Random();
 				if(random.nextInt(100) < 30) {
-					idleDialogue = idleDialogues[random.nextInt(idleDialogues.length)];
+					int idleIndex = random.nextInt(idleDialogues.length);
+					idleDialogue = main.PcText.pick(gp, idleDialogues[idleIndex], idlePcDialogues[idleIndex]);
 					showIdleDialogue = true;
 					idleDialogueTimer = 0;
 				} else { idleDialogueTimer = 0; }

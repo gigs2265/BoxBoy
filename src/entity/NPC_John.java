@@ -6,6 +6,7 @@ import main.Gamepanel;
 public class NPC_John extends Entity {
 	
 	String[] idleDialogues = new String[12];
+	String[] idlePcDialogues = new String[12]; // "PC Mode" sanitized idle bubbles, same indices - see main.PcText
 	
 	public NPC_John(Gamepanel gp) {
 		super(gp);
@@ -37,6 +38,14 @@ public class NPC_John extends Entity {
 		dialouges[4] = "Please dude just get me the fuck out of here \n I keep hearing screaming it sounds like a monster";
 		dialouges[5] = "All night I heard 'JIMMY!!!! YOU ARE A FAT HOG!' Over and over again!.\n It sounda alot like Nick but I can't tell for sure I don't even have my dab rig \nto mellow me out";
 		dialouges[6] = "All I've got is this joint i stole off Mike before the bar. I could'nt help it, \nit was the fellon in me, but it's not even calming me down though. \n Joints are below me but I have nothing else.";
+
+		pcDialouges[0] = "GOODNESS, THEO?!?! IS THAT YOU?";
+		pcDialouges[1] = "Dude, I thought you might not have made it.";
+		pcDialouges[2] = "Have you seen my phone? I need to catch up on \nsome videos.";
+		pcDialouges[3] = "No? Oh no!!!!!!";
+		pcDialouges[4] = "Please, could you help me get out of here? \n I keep hearing shouting, it sounds like a monster.";
+		pcDialouges[5] = "All night I heard 'JIMMY!!!! YOU ARE QUITE LARGE!' Over and over again!.\n It sounds a lot like Nick but I can't be sure, I don't even have \nmy relaxation supplies to calm down.";
+		pcDialouges[6] = "All I've got is this rolled item I borrowed from Mike before the bar. \nI couldn't resist, it's a habit of mine, but it's not even calming \nme down. It's not my preference, but it's all I have.";
 	}
 	
 	public void setIdleDialogues() {
@@ -52,6 +61,19 @@ public class NPC_John extends Entity {
 		idleDialogues[9] = "Fellon life";
 		idleDialogues[10] = "What was that?!";
 		idleDialogues[11] = "YO BOX HEAD";
+
+		idlePcDialogues[0] = "Where's my phone...";
+		idlePcDialogues[1] = "I need my videos...";
+		idlePcDialogues[2] = "Oh no!!!";
+		idlePcDialogues[3] = "They could've left me something at least";
+		idlePcDialogues[4] = "Was that Nick?";
+		idlePcDialogues[5] = "I need my relaxation supplies...";
+		idlePcDialogues[6] = "*nervous*";
+		idlePcDialogues[7] = "My case worker is going to be disappointed";
+		idlePcDialogues[8] = "Get me out!!";
+		idlePcDialogues[9] = "It's a whole lifestyle";
+		idlePcDialogues[10] = "What was that?!";
+		idlePcDialogues[11] = "HEY BOX HEAD";
 	}
 	
 	public void setAction() {
@@ -73,7 +95,8 @@ public class NPC_John extends Entity {
 			if(idleDialogueTimer > 280) {
 				Random random = new Random();
 				if(random.nextInt(100) < 35) {
-					idleDialogue = idleDialogues[random.nextInt(idleDialogues.length)];
+					int idleIndex = random.nextInt(idleDialogues.length);
+					idleDialogue = main.PcText.pick(gp, idleDialogues[idleIndex], idlePcDialogues[idleIndex]);
 					showIdleDialogue = true;
 					idleDialogueTimer = 0;
 				} else { idleDialogueTimer = 0; }

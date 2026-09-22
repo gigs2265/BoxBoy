@@ -6,6 +6,7 @@ import main.Gamepanel;
 public class NPC_Miles extends Entity{
 	
 	String[] idleDialogues = new String[12];
+	String[] idlePcDialogues = new String[12]; // "PC Mode" sanitized idle bubbles, same indices - see main.PcText
 	
 	public NPC_Miles(Gamepanel gp) {
 		super(gp);
@@ -43,6 +44,20 @@ public class NPC_Miles extends Entity{
 		dialouges[10] = "...";
 		dialouges[11] = "By the way, if you see Mike D tell him I said  he's an idiot.";
 		dialouges[12] = "Ok, you can fuck off now.";
+
+		pcDialouges[0] = "About time you found me...";
+		pcDialouges[1] = "Wow, you're really not the sharpest tool.";
+		pcDialouges[2] = "Anyway, more about me heh heh heh. I dozed off before we even left the bar \nbut when I woke up \nI was resting on the floor here!";
+		pcDialouges[3] = "They took my phone, my wallet (quite a substantial amount of \ncash in there) AND my drinks! I bet when those less-fortunate \nindividuals open my wallet it will \nprobably be the most money they've ever seen!";
+		pcDialouges[4] = "heh heh heh I'm pretty great.";
+		pcDialouges[5] = "Once we're off this island, I'm DEFINITELY getting that 5th jet ski. \nLife's too short to settle for only 4.";
+		pcDialouges[6] = "AND I'm going to treat myself to something nice!!!!!";
+		pcDialouges[7] = "There might be other friends downstairs, go check.";
+		pcDialouges[8] = "You want me to go with you? No thanks...I should stay here and find \na TV or something, the fights are on soon.";
+		pcDialouges[9] = "Plus I couldn't really help anyway, unless these rats \nexclusively do grappling.";
+		pcDialouges[10] = "...";
+		pcDialouges[11] = "By the way, if you see Mike D, let him know I said \nhe's a bit misguided.";
+		pcDialouges[12] = "Okay, you're free to go now.";
 	}
 	
 	public void setIdleDialogues() {
@@ -58,6 +73,19 @@ public class NPC_Miles extends Entity{
 		idleDialogues[9] = "BLOW JOBS! BLOWJOBS! BLOW JOBS!!";
 		idleDialogues[10] = "Vin and Karen are gonna be so pissed if I cant come in later..";
 		idleDialogues[11] = "Fuck off.";
+
+		idlePcDialogues[0] = "Heh heh heh...";
+		idlePcDialogues[1] = "I'm the best.";
+		idlePcDialogues[2] = "GOODNESS GRACIOUS!";
+		idlePcDialogues[3] = "F.N.C!!!!";
+		idlePcDialogues[4] = "Theo is quite bothersome";
+		idlePcDialogues[5] = "I better not miss the fights tonight";
+		idlePcDialogues[6] = "I need a TV";
+		idlePcDialogues[7] = "Mike's a bit misguided.";
+		idlePcDialogues[8] = "I truly enjoy financial success";
+		idlePcDialogues[9] = "TREATS! TREATS! TREATS!!";
+		idlePcDialogues[10] = "Vin and Karen will be disappointed if I \ncan't make it in later..";
+		idlePcDialogues[11] = "Please excuse me.";
 	}
 	
 	public void setAction() {
@@ -79,7 +107,8 @@ public class NPC_Miles extends Entity{
 			if(idleDialogueTimer > 250) {
 				Random random = new Random();
 				if(random.nextInt(100) < 42) {
-					idleDialogue = idleDialogues[random.nextInt(idleDialogues.length)];
+					int idleIndex = random.nextInt(idleDialogues.length);
+					idleDialogue = main.PcText.pick(gp, idleDialogues[idleIndex], idlePcDialogues[idleIndex]);
 					showIdleDialogue = true;
 					idleDialogueTimer = 0;
 				} else { idleDialogueTimer = 0; }

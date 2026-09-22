@@ -2,6 +2,7 @@ package object;
 
 import entity.Entity;
 import main.Gamepanel;
+import main.PcText;
 
 public class OBJ_MilesDoor extends Entity {
 
@@ -27,7 +28,9 @@ public class OBJ_MilesDoor extends Entity {
 		gamePanel.gameState = gamePanel.dialougeState;
 
 		if(!gamePanel.quest.foundLiam) {
-			gamePanel.ui.currentDialouge = "HEY STUPID\nDID YOU READ THE QUEST LIST?!";
+			gamePanel.ui.currentDialouge = PcText.pick(gamePanel,
+				"HEY STUPID\nDID YOU READ THE QUEST LIST?!",
+				"A friendly reminder\nto please review the quest list!");
 		} else {
 			gamePanel.ui.currentDialouge = "It's locked! I need a key.";
 		}
@@ -38,7 +41,9 @@ public class OBJ_MilesDoor extends Entity {
 
 		// Check if Liam quest is complete first
 		if(!gamePanel.quest.canUnlockMilesDoor()) {
-			gamePanel.ui.currentDialouge = "HEY STUPID\nDID YOU READ THE QUEST LIST?!";
+			gamePanel.ui.currentDialouge = PcText.pick(gamePanel,
+				"HEY STUPID\nDID YOU READ THE QUEST LIST?!",
+				"A friendly reminder\nto please review the quest list!");
 			// Don't consume the key or remove the door
 			return;
 		}
@@ -55,7 +60,9 @@ public class OBJ_MilesDoor extends Entity {
 		if(keyIndex != 999) {
 			// Only remove key and allow door to be removed if quest is complete
 			entity.inventory.remove(keyIndex);
-			gamePanel.ui.currentDialouge = "SiIiIcck! \nMile's fat ass should be inside.";
+			gamePanel.ui.currentDialouge = PcText.pick(gamePanel,
+				"SiIiIcck! \nMile's fat ass should be inside.",
+				"Wonderful! \nMiles should be right through here.");
 			gamePanel.playSE(5);
 			// Door will be removed by Player.pickUpObject after this returns
 		} else {

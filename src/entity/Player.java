@@ -465,7 +465,8 @@ public class Player extends Entity {
                     if(monsterName.equals("Brian")) {
                         // (death sound already played above, replacing the hit sound)
                         // BOSS CUTSCENE - Brian is too weak to fight, talks before dying
-                        gp.ui.startCutscene(gp.ui.brianCutscene, gp.ui.CUTSCENE_BRIAN_DEATH, gp.monster[gp.currentMap][i]);
+                        String[] brianLines = gp.pcMode ? gp.ui.brianCutscenePc : gp.ui.brianCutscene;
+                        gp.ui.startCutscene(brianLines, gp.ui.CUTSCENE_BRIAN_DEATH, gp.monster[gp.currentMap][i]);
                         // Complete Brian quest
                         if(!gp.quest.defeatedBrian) {
                             gp.quest.completeDefeatedBrian();
@@ -473,7 +474,7 @@ public class Player extends Entity {
                     }
                     else {
                         gp.monster[gp.currentMap][i].dying = true;
-                        gp.ui.addMessage("You killed " + monsterName + "!");
+                        gp.ui.addMessage("You killed " + gp.monster[gp.currentMap][i].getDisplayName(gp) + "!");
                         gp.ui.addMessage("Exp +" + gp.monster[gp.currentMap][i].exp);
                         exp += gp.monster[gp.currentMap][i].exp;
                         checkLevelUp();
@@ -500,7 +501,9 @@ public class Player extends Entity {
             
             gp.playSE(9);
             gp.gameState = gp.dialougeState;
-            gp.ui.currentDialouge = "Your dumbass reached level " + level + "\nGood job idiot!";
+            gp.ui.currentDialouge = gp.pcMode
+                ? "Great job! You reached level " + level + "!\nYou are so good at this game!"
+                : "Your dumbass reached level " + level + "\nGood job idiot!";
         }
     }
     

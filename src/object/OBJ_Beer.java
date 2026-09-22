@@ -5,6 +5,7 @@ package object;
 
 import entity.Entity;
 import main.Gamepanel;
+import main.PcText;
 
 public class OBJ_Beer extends Entity {
 	
@@ -20,13 +21,16 @@ public class OBJ_Beer extends Entity {
 		name = "BEER";
 		down1 = setup("/objects/beer1",gp.tileSize,gp.tileSize);
 		description = "[Beer]\n Hopefully this gets me drunk";
+		pcDescription = "[Beer]\n A responsibly-sourced beverage, to be \n enjoyed in moderation.";
 		price = 2;
 	}
 	
 public void use (Entity entity) {
 		
 		gp.gameState = gp.dialougeState;
-		gp.ui.currentDialouge = "THEY GOT BREWSKIS ON THIS ISLAND?!?! \nFUCK YEA DAWG I FEEL SO MUCH BETTER";
+		gp.ui.currentDialouge = PcText.pick(gp,
+			"THEY GOT BREWSKIS ON THIS ISLAND?!?! \nFUCK YEA DAWG I FEEL SO MUCH BETTER",
+			"This island offers refreshments! \nI feel adequately hydrated.");
 		entity.life+= value;
 		if(gp.player.life > gp.player.maxLife) {
 			gp.player.life = gp.player.maxLife;

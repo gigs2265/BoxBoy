@@ -47,7 +47,17 @@ public class UI {
         "Nick: GRRRRR... Head. Square. \nTits. ROUND!!!!!",
         "Theo: Never mind... Time to \nWHOOP SOME ASS!"
     };
-    
+
+    // "PC Mode" sanitized version of nickCutscene, same line count/order - see main.PcText
+    public String[] nickCutscenePc = {
+        "Theo: Goodness gracious, Nick, is \nthat you?!",
+        "Nick: RAWRRRRR!!!! I HAVE STRONG \nFEELINGS FOR JIMMY!",
+        "Theo: ...Wow, that is Nick. I don't \nknow if the beverages are talking \nbut I think he's not himself.",
+        "Theo: I don't think I have it in \nme to engage him physically.",
+        "Nick: GRRRRR... Head. Square. \nAttractive!!!!!",
+        "Theo: Never mind... Time for a \nfirm disagreement!"
+    };
+
     public String[] brianCutscene = {
         "Brian collapses, too weak to \nfight any longer...",
         "Theo: Before I end this... \nanswer me one thing.",
@@ -59,6 +69,20 @@ public class UI {
         "Brian: Now I can poop out clones \nof the rat people... as many \nas I want...",
         "Theo: ...That's the most disgusting \nthing I've ever heard.",
         "Theo: This ends now."
+    };
+
+    // "PC Mode" sanitized version of brianCutscene, same line count/order - see main.PcText
+    public String[] brianCutscenePc = {
+        "Brian collapses, unable to \ncontinue the confrontation...",
+        "Theo: Before we conclude this... \nplease answer one question.",
+        "Theo: Why? Why were my friends \nand I brought to this island?",
+        "Brian: *cough*... I mentored a man \nnamed Santuchii...",
+        "Brian: I involved him in my research \nto develop... the rat-based \nhumanoid personnel.",
+        "Brian: Santuchii did not survive \nthe process...",
+        "Brian: But I incorporated aspects of \nhis remains into my own biology.",
+        "Brian: Now I can produce more \nrat-based personnel... as many \nas needed...",
+        "Theo: ...That is deeply \nunsettling to hear.",
+        "Theo: This concludes here."
     };
     public int commandNum = 0;
     public int titleScreenState = 0;
@@ -342,8 +366,10 @@ public class UI {
             
             if(itemIndex < entity.inventory.size()) {
                 drawSubWindow(dFrameX, dFrameY, dFrameWidth, dFrameHeight);
-                
-                for(String line : entity.inventory.get(itemIndex).description.split("\n")) {
+
+                Entity selectedItem = entity.inventory.get(itemIndex);
+                String shownDescription = PcText.pick(gp, selectedItem.description, selectedItem.pcDescription);
+                for(String line : shownDescription.split("\n")) {
                     g2.drawString(line, textX, textY);
                     textY += 32;
                 }
@@ -360,7 +386,7 @@ public class UI {
         String text;
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 110));
         
-        text = "You Suck!";
+        text = gp.pcMode ? "Nice Try!" : "You Suck!";
         g2.setColor(Color.black);
         x = getXforCenteredText(text);
         y = gp.tileSize*4;
@@ -404,8 +430,12 @@ public class UI {
         
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 30f));
         g2.setColor(Color.white);
-        
-        String[] lines = {
+
+        String[] lines = gp.pcMode ? new String[] {
+            "Brian was respectfully defeated and your",
+            "friends have been safely located, now it's",
+            "time to find a boat and depart the island!"
+        } : new String[] {
             "Brian's fat ass was killed and you freed",
             "your friends now time to find a boat",
             "and get the fuck outta here!"
@@ -416,9 +446,12 @@ public class UI {
             g2.drawString(line, x, y);
             y += gp.tileSize;
         }
-        
+
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 26f));
-        String[] lines2 = {
+        String[] lines2 = gp.pcMode ? new String[] {
+            "Thank you for spending your valuable time",
+            "with this delightful game!"
+        } : new String[] {
             "Thanks for wasting your time on",
             "this crappy game!"
         };
@@ -442,11 +475,13 @@ public class UI {
         g2.setFont(g2.getFont().deriveFont(32f));
         
         int frameX = gp.tileSize*6;
-        int frameY = gp.tileSize;
+        // frameY/frameHeight grown by one row (and shifted up) to fit the new
+        // PC Mode option without "Back" spilling past the bottom of the window
+        int frameY = gp.tileSize/2;
         int frameWidth = gp.tileSize*8;
-        int frameHeight = gp.tileSize*10;
+        int frameHeight = gp.tileSize*11;
         drawSubWindow(frameX, frameY, frameWidth, frameHeight);
-        
+
         switch(subState) {
             case 0: option_top(frameX,frameY); break;
             case 1: option_fullScreenNotification(frameX, frameY); break;
@@ -479,32 +514,42 @@ public class UI {
                 subState = 1;
             }
         }
-        
+
         textY += gp.tileSize;
-        g2.drawString("Music", textX, textY);
+        g2.drawString("PC Mode", textX, textY);
         if(commandNum == 1) {
             g2.drawString(">", textX-25, textY);
+            if(gp.keyH.enterPressed == true) {
+                gp.pcMode = !gp.pcMode;
+                gp.playSE(10);
+            }
         }
-        
+
         textY += gp.tileSize;
-        g2.drawString("Sound EF", textX, textY);
+        g2.drawString("Music", textX, textY);
         if(commandNum == 2) {
             g2.drawString(">", textX-25, textY);
         }
-        
+
+        textY += gp.tileSize;
+        g2.drawString("Sound EF", textX, textY);
+        if(commandNum == 3) {
+            g2.drawString(">", textX-25, textY);
+        }
+
         textY += gp.tileSize;
         g2.drawString("Controls", textX, textY);
-        if(commandNum == 3) {
+        if(commandNum == 4) {
             g2.drawString(">", textX-25, textY);
             if(gp.keyH.enterPressed == true) {
                 subState = 2;
                 commandNum = 0;
             }
         }
-        
+
         textY += gp.tileSize;
         g2.drawString("Save Game", textX, textY);
-        if(commandNum == 4) {
+        if(commandNum == 5) {
             g2.drawString(">", textX-25, textY);
             if(gp.keyH.enterPressed == true) {
                 gp.saveLoad.save();
@@ -513,27 +558,27 @@ public class UI {
                 commandNum = 0;
             }
         }
-        
+
         textY += gp.tileSize;
-        g2.drawString("Fuck Off", textX, textY);
-        if(commandNum == 5) {
+        g2.drawString(gp.pcMode ? "Exit Kindly" : "Fuck Off", textX, textY);
+        if(commandNum == 6) {
             g2.drawString(">", textX-25, textY);
             if(gp.keyH.enterPressed == true) {
                 subState = 3;
                 commandNum = 0;
             }
         }
-        
-        textY += gp.tileSize*2;
+
+        textY += gp.tileSize;
         g2.drawString("Back", textX, textY);
-        if(commandNum == 6) {
+        if(commandNum == 7) {
             g2.drawString(">", textX-25, textY);
             if(gp.keyH.enterPressed == true) {
                 gp.gameState = gp.playState;
                 commandNum = 0;
             }
         }
-        
+
         textX = frameX + (int)(gp.tileSize*4.5);
         textY = frameY + gp.tileSize*2 + 24;
         g2.setStroke(new BasicStroke(3));
@@ -541,17 +586,23 @@ public class UI {
         if(gp.fullScreenOn == true) {
             g2.fillRect(textX, textY, 24, 24);
         }
-        
+
+        textY += gp.tileSize;
+        g2.drawRect(textX, textY, 24, 24);
+        if(gp.pcMode == true) {
+            g2.fillRect(textX, textY, 24, 24);
+        }
+
         textY += gp.tileSize;
         g2.drawRect(textX, textY, 120, 24);
         int volumeWidth = 24 * gp.music.volumeScale;
         g2.fillRect(textX, textY, volumeWidth, 24);
-        
+
         textY += gp.tileSize;
         g2.drawRect(textX, textY, 120, 24);
         volumeWidth = 24 * gp.se.volumeScale;
         g2.fillRect(textX, textY, volumeWidth, 24);
-        
+
         gp.config.saveConfig();
     }
     
@@ -559,7 +610,9 @@ public class UI {
         int textX = frameX + gp.tileSize;
         int textY = frameY + gp.tileSize*3;
         
-        currentDialouge = "Gotta restart the game for \nthat shit. \nHope you weren't busy IDIOT";
+        currentDialouge = PcText.pick(gp,
+            "Gotta restart the game for \nthat shit. \nHope you weren't busy IDIOT",
+            "A restart is required for that \nsetting to take effect. \nThank you for your patience!");
         for(String line: currentDialouge.split("\n")){
             g2.drawString(line, textX, textY);
             textY+= 40;
@@ -609,11 +662,11 @@ public class UI {
             g2.drawString(">", textX-25, textY);
             if(gp.keyH.enterPressed == true) {
                 subState = 0;
-                commandNum = 3;
+                commandNum = 4;
             }
         }
     }
-    
+
     public void option_quitGameConfirm(int frameX, int frameY) {
         int textX = frameX + gp.tileSize;
         int textY = frameY + gp.tileSize*3;
@@ -644,11 +697,11 @@ public class UI {
             g2.drawString(">", textX-25, textY);
             if(gp.keyH.enterPressed == true) {
                 subState = 0;
-                commandNum = 4;
+                commandNum = 6;
             }
         }
     }
-    
+
     public void drawTransition() {
         counter++;
         g2.setColor(new Color(0,0,0,counter*5));
@@ -703,7 +756,7 @@ public class UI {
                 if(item.name.equals("$Fartcoin") || item.type == item.type_pickupOnly) {
                     // Add to player's currency instead of inventory
                     gp.player.$fartcoin += item.value;
-                    gp.ui.addMessage("+" + item.value + " $Fartcoin");
+                    gp.ui.addMessage("+" + item.value + " " + PcText.pick(gp, item.name, item.pcName));
                     gp.playSE(12); // Play coin sound
                     
                     // Remove from chest
@@ -719,7 +772,7 @@ public class UI {
                     if(gp.player.inventory.size() < gp.player.maxInventorySize) {
                         // Add item to player inventory
                         gp.player.inventory.add(item);
-                        gp.ui.addMessage("Obtained " + item.name + "!");
+                        gp.ui.addMessage("Obtained " + PcText.pick(gp, item.name, item.pcName) + "!");
                         
                         // Remove item from chest
                         npc.inventory.remove(itemIndex);
@@ -794,8 +847,8 @@ public class UI {
         width = gp.tileSize*6;
         height = gp.tileSize*2;
         drawSubWindow (x, y, width, height);
-        g2.drawString("$FartCoin:" + gp.player.$fartcoin, x+24, y+60);
-        
+        g2.drawString((gp.pcMode ? "$FlatuCoin:" : "$FartCoin:") + gp.player.$fartcoin, x+24, y+60);
+
         int itemIndex = getItemIndexOnSlot(npcSlotCol,npcSlotRow);
         if(itemIndex < npc.inventory.size()) {
             x = (int)(gp.tileSize*5.5);
@@ -813,7 +866,7 @@ public class UI {
                 if(npc.inventory.get(itemIndex).price > gp.player.$fartcoin) {
                     subState = 0;
                     gp.gameState = gp.dialougeState;
-                    currentDialouge = "Not enough Fartcoins.";
+                    currentDialouge = gp.pcMode ? "Not enough FlatuCoins." : "Not enough Fartcoins.";
                     drawDialougeScreen();    
                 } else if(gp.player.inventory.size() == gp.player.maxInventorySize) {
                     subState = 0;
@@ -847,8 +900,8 @@ public class UI {
         width = gp.tileSize*6;
         height = gp.tileSize*2;
         drawSubWindow (x, y, width, height);
-        g2.drawString("$FartCoin:" + gp.player.$fartcoin, x+24, y+60);
-        
+        g2.drawString((gp.pcMode ? "$FlatuCoin:" : "$FartCoin:") + gp.player.$fartcoin, x+24, y+60);
+
         int itemIndex = getItemIndexOnSlot(playerSlotCol,playerSlotRow);
         if(itemIndex < gp.player.inventory.size()) {
             x = (int)(gp.tileSize*15.5);
@@ -934,7 +987,9 @@ public class UI {
 
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 40F));
 
-        String[] options = {"New Game", "Load Game", "Fuck Off"};
+        String[] options = gp.pcMode
+            ? new String[] {"New Game", "Load Game", "Exit Kindly"}
+            : new String[] {"New Game", "Load Game", "Fuck Off"};
         int y = gp.tileSize * 11;
         int x = (gp.screenWidth - (options.length * gp.tileSize * 6)) / 2 + gp.tileSize;
 
@@ -1015,7 +1070,7 @@ public class UI {
         textY += lineHeight;
         g2.drawString("Next Lv", textX, textY);
         textY += lineHeight;
-        g2.drawString("$fartcoin", textX, textY);
+        g2.drawString(gp.pcMode ? "$flatucoin" : "$fartcoin", textX, textY);
         textY += lineHeight + 10;
         g2.drawString("Weapon", textX, textY);
         textY += lineHeight + 15;

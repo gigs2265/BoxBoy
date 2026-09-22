@@ -13,6 +13,7 @@ public class OBJ_Spicyburger extends Entity{
 		down1 = setup("/objects/spicyburger", gp.tileSize, gp.tileSize);	
 		defenseValue = 2;
 		description = "["+name+"]\n My ass is gonna hurt tomorrow, but \nmy gut is harder than ever! .";
+		pcDescription = "["+name+"]\n A bold culinary choice with \n lasting core benefits.";
 		price = 4;
 	}
 

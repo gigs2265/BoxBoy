@@ -9,6 +9,7 @@ public class NPC_Vic extends Entity {
 	
 	
 	String[] idleDialogues = new String[12];
+	String[] idlePcDialogues = new String[12]; // "PC Mode" sanitized idle bubbles, same indices - see main.PcText
 	
 	public NPC_Vic(Gamepanel gp) {
 		super(gp);
@@ -48,6 +49,18 @@ public class NPC_Vic extends Entity {
 		dialouges[8] = "Oh wait! don't you still have that rat spray on you? \nTry using that on those rat-things if you run into them!";
 		dialouges[9] = "Press ENTER when those mother fuckers get in your face. \nThat should fuck em up.";
 		dialouges[10] = "For once you're square ass was right about bringing it to the \nshop.";
+
+		pcDialouges[0] = "Finally, you're awake, friend.";
+		pcDialouges[1] = "We must have dozed off on our way home from \nthe social gathering!";
+		pcDialouges[2] = "That's... unfortunate.";
+		pcDialouges[3] = "I DID mention we should have left earlier!! But \nwe chose to stay for one more beverage!!!";
+		pcDialouges[4] = "...When I woke up I saw a rat-like creature \nclosing the door down the hallway.";
+		pcDialouges[5] = "I think it was trying to secure us in here, but \nit seems to have forgotten the key.";
+		pcDialouges[6] = "Please grab the key and unlock the door, \nfriend!!!";
+		pcDialouges[7] = "I would have done it myself but I'm quite tired. \nI haven't had an energy drink in over an hour!";
+		pcDialouges[8] = "Oh wait! Don't you still have that rat spray on you? \nTry using that if you encounter those creatures!";
+		pcDialouges[9] = "Please press ENTER when those creatures approach. \nThat should resolve the situation.";
+		pcDialouges[10] = "For once your practical choices were correct about \nbringing it along.";
 	}
 	
 	public void setIdleDialogues() {
@@ -63,6 +76,19 @@ public class NPC_Vic extends Entity {
 		idleDialogues[9] = "THEOOO HELLO?!?!";
 		idleDialogues[10] = "FUCK Rattatuchii!";
 		idleDialogues[11] = "I could be golfing right now...";
+
+		idlePcDialogues[0] = "I need an energy drink...";
+		idlePcDialogues[1] = "Is there a convenience store nearby?";
+		idlePcDialogues[2] = "*sigh*";
+		idlePcDialogues[3] = "PLEASE COME OVER AND PRESS ENTER ON ME, FRIEND!!";
+		idlePcDialogues[4] = "Where are we?";
+		idlePcDialogues[5] = "My blood sugar is a bit low";
+		idlePcDialogues[6] = "Please hurry along!!";
+		idlePcDialogues[7] = "Someone's about to have a rough day!";
+		idlePcDialogues[8] = "*checks blood sugar monitor*";
+		idlePcDialogues[9] = "THEOOO HELLO?!?!";
+		idlePcDialogues[10] = "I am not fond of Rattatuchii!";
+		idlePcDialogues[11] = "I could be golfing right now...";
 	}
 	
 	public void setAction() {
@@ -105,7 +131,7 @@ public class NPC_Vic extends Entity {
 				if(random.nextInt(100) < 40) {
 					// Pick a random dialogue
 					int dialogueIndex = random.nextInt(idleDialogues.length);
-					idleDialogue = idleDialogues[dialogueIndex];
+					idleDialogue = main.PcText.pick(gp, idleDialogues[dialogueIndex], idlePcDialogues[dialogueIndex]);
 					showIdleDialogue = true;
 					idleDialogueTimer = 0;
 					System.out.println("Vic: Showing dialogue - " + idleDialogue);

@@ -40,11 +40,17 @@ public class Entity {
 	int hpBarCounter = 0;
 	public int shotAvailableCounter = 0;
 	String dialouges[] = new String[20];
+	String pcDialouges[] = new String[20]; // "PC Mode" sanitized dialogue, same indices as dialouges - see main.PcText
 	int dialougeIndex = 0;
 	public boolean dialogueComplete = false; // Track if all dialogues have been shown
 	public BufferedImage image, image2, image3;
 	public String name;
+	public String pcName = ""; // "PC Mode" sanitized display name - see main.PcText. Never used for identity (saves/inventory/pickup routing) - only display.
 	public boolean collision = false;
+
+	public String getDisplayName(Gamepanel gp) {
+		return main.PcText.pick(gp, name, pcName);
+	}
 	
 	// Idle dialogue variables
 	public String idleDialogue = "";
@@ -78,6 +84,7 @@ public class Entity {
 	public int attackValue;
 	public int defenseValue;
 	public String description = "";
+	public String pcDescription = ""; // "PC Mode" sanitized version of description - see main.PcText
 	public int usedCost;
 	public int price;
 	
@@ -113,7 +120,7 @@ public class Entity {
 			gp.gameState = gp.playState; // Exit dialogue state
 		}
 		else {
-			gp.ui.currentDialouge = dialouges[dialougeIndex];
+			gp.ui.currentDialouge = main.PcText.pick(gp, dialouges[dialougeIndex], pcDialouges[dialougeIndex]);
 			dialougeIndex++;
 
 			switch(gp.player.direction) {

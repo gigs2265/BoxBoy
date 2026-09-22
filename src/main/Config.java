@@ -32,7 +32,15 @@ public class Config {
 			// SE VOL
 			bw.write(String.valueOf(gp.se.volumeScale));
 			bw.newLine();
-			
+
+			// PC MODE
+			if(gp.pcMode == true) {
+				bw.write("on");
+			} else {
+				bw.write("off");
+			}
+			bw.newLine();
+
 			bw.close();
 			
 		} catch (IOException e) {
@@ -64,7 +72,17 @@ public class Config {
 			if(s != null) {
 				gp.se.volumeScale = Integer.parseInt(s);
 			}
-			
+
+			// PC MODE - older config files won't have this line; s will be
+			// null and pcMode just stays at its default (off)
+			s = br.readLine();
+			if(s != null && s.equals("on")) {
+				gp.pcMode = true;
+			}
+			if(s != null && s.equals("off")) {
+				gp.pcMode = false;
+			}
+
 			br.close();
 					 
 		} catch (Exception e) {
