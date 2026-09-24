@@ -11,6 +11,7 @@ public class OBJ_Boxcutter extends Entity {
 		name = "Box Cutter";
 		down1 = setup("/objects/boxcutter", gp.tileSize, gp.tileSize);
 		attackValue = 2;
+		price = 6;
 		attackArea.width = 30;
 		attackArea.height = 30;
 		description = "["+name+"]\n AKA a Theo's head cutter.";

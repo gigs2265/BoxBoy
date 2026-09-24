@@ -327,8 +327,9 @@ public class UI {
         int slotSize = gp.tileSize+3;
         
         for(int i = 0; i < entity.inventory.size(); i++) {
-            if(entity.inventory.get(i) == entity.currentWepon || 
-               entity.inventory.get(i) == entity.currentSheild) {
+            if(entity.inventory.get(i) == entity.currentWepon ||
+               entity.inventory.get(i) == entity.currentSheild ||
+               entity.inventory.get(i) == entity.currentBoots) {
                 g2.setColor(new Color(240,200,0));    
                 g2.fillRoundRect(slotX, slotY, gp.tileSize, gp.tileSize, 10, 10);
             }
@@ -910,14 +911,16 @@ public class UI {
             height = gp.tileSize;
             drawSubWindow (x, y, width, height);
             g2.drawImage(fartcoin, x+10, y+8, 32, 32, null);
-            int price = gp.player.inventory.get(itemIndex).price/2;
+            // Half the buy price, but never 0 - cheap items (price 1) used to sell for nothing
+            int price = Math.max(1, gp.player.inventory.get(itemIndex).price/2);
             String text = "" + price;
             x = getXforAlignToRightText(text, gp.tileSize*18-20);
             g2.drawString(text, x, y+34);
             
             if(gp.keyH.enterPressed == true) {
-                if(gp.player.inventory.get(itemIndex) == gp.player.currentWepon || 
-                        gp.player.inventory.get(itemIndex) == gp.player.currentSheild) {
+                if(gp.player.inventory.get(itemIndex) == gp.player.currentWepon ||
+                        gp.player.inventory.get(itemIndex) == gp.player.currentSheild ||
+                        gp.player.inventory.get(itemIndex) == gp.player.currentBoots) {
                     commandNum = 0;
                     subState = 0;
                     gp.gameState = gp.dialougeState;
@@ -1047,11 +1050,16 @@ public class UI {
         
         g2.setColor(Color.white);
         g2.setFont(g2.getFont().deriveFont(32F));
-        
-        int textX = frameX + 20;        
-        int textY = frameY + gp.tileSize;
+
+        String title = "Stats";
+        int titleX = frameX + (frameWidth/2) - (int)(g2.getFontMetrics().getStringBounds(title, g2).getWidth()/2);
+        int titleY = frameY + gp.tileSize;
+        g2.drawString(title, titleX, titleY);
+
+        int textX = frameX + 20;
+        int textY = titleY + gp.tileSize;
         final int lineHeight = 35;
-        
+
         g2.drawString("Level", textX, textY);
         textY += lineHeight;
         g2.drawString("Life", textX, textY);
@@ -1066,19 +1074,17 @@ public class UI {
         textY += lineHeight;
         g2.drawString("Defense", textX, textY);
         textY += lineHeight;
+        g2.drawString("Speed", textX, textY);
+        textY += lineHeight;
         g2.drawString("Exp", textX, textY);
         textY += lineHeight;
         g2.drawString("Next Lv", textX, textY);
         textY += lineHeight;
         g2.drawString(gp.pcMode ? "$flatucoin" : "$fartcoin", textX, textY);
-        textY += lineHeight + 10;
-        g2.drawString("Weapon", textX, textY);
-        textY += lineHeight + 15;
-        g2.drawString("Bloat", textX, textY);
         textY += lineHeight;
-        
+
         int tailX = (frameX + frameWidth) - 30;
-        textY = frameY + gp.tileSize;
+        textY = titleY + gp.tileSize;
         String value;
         
         value = String.valueOf(gp.player.level);
@@ -1115,7 +1121,12 @@ public class UI {
         textX = getXforAlignToRightText(value, tailX);
         g2.drawString(value, textX, textY);
         textY += lineHeight;
-        
+
+        value = String.valueOf(gp.player.speed);
+        textX = getXforAlignToRightText(value, tailX);
+        g2.drawString(value, textX, textY);
+        textY += lineHeight;
+
         value = String.valueOf(gp.player.exp);
         textX = getXforAlignToRightText(value, tailX);
         g2.drawString(value, textX, textY);
@@ -1130,10 +1141,38 @@ public class UI {
         textX = getXforAlignToRightText(value, tailX);
         g2.drawString(value, textX, textY);
         textY += lineHeight;
-        
-        g2.drawImage(gp.player.currentWepon.down1, tailX - gp.tileSize, textY - 24, null);
-        textY += gp.tileSize;
-        g2.drawImage(gp.player.currentSheild.down1, tailX - gp.tileSize, textY - 24, null);
+
+        drawEquipmentWindow(frameX + frameWidth, frameY);
+    }
+
+    public void drawEquipmentWindow(int frameX, int frameY) {
+        final int frameWidth = gp.tileSize*4;
+        final int frameHeight = gp.tileSize*5;
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
+
+        g2.setColor(Color.white);
+        g2.setFont(g2.getFont().deriveFont(32F));
+
+        String title = "Equipment";
+        int textX = frameX + (frameWidth/2) - (int)(g2.getFontMetrics().getStringBounds(title, g2).getWidth()/2);
+        int textY = frameY + gp.tileSize;
+        g2.drawString(title, textX, textY);
+
+        g2.setFont(g2.getFont().deriveFont(22F));
+        final int labelX = frameX + 20;
+        final int iconSize = gp.tileSize/2; // shrunk so the icon sits next to its label instead of stacked below it
+        int rowY = textY + gp.tileSize;
+
+        g2.drawString("Weapon:", labelX, rowY);
+        g2.drawImage(gp.player.currentWepon.down1, labelX + 110, rowY - iconSize + 8, iconSize, iconSize, null);
+        rowY += gp.tileSize;
+
+        g2.drawString("Shield:", labelX, rowY);
+        g2.drawImage(gp.player.currentSheild.down1, labelX + 110, rowY - iconSize + 8, iconSize, iconSize, null);
+        rowY += gp.tileSize;
+
+        g2.drawString("Boots:", labelX, rowY);
+        g2.drawImage(gp.player.currentBoots.down1, labelX + 110, rowY - iconSize + 8, iconSize, iconSize, null);
     }
     
     public void drawSubWindow(int x, int y, int width, int height) {

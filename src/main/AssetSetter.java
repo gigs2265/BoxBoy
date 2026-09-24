@@ -16,6 +16,7 @@ import object.OBJ_Beer;
 import object.OBJ_Boxcutter;
 import object.OBJ_Chest;
 import object.OBJ_Door;
+import object.OBJ_FreshTimbs;
 import object.OBJ_MilesDoor;
 import object.OBJ_VicDoor;
 import object.OBJ_Fart_Coin;
@@ -200,7 +201,13 @@ public class AssetSetter {
 		gp.obj[mapNum][i].worldX = gp.tileSize * 25;
 		gp.obj[mapNum][i].worldY = gp.tileSize * 35;
 		i++;
-		
+
+		// Fresh Timbs - free pickup in the north clearing
+		gp.obj[mapNum][i] = new OBJ_FreshTimbs(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize * 40;
+		gp.obj[mapNum][i].worldY = gp.tileSize * 3;
+		i++;
+
 		// DUNGEON OBJECTS (Map 1)
 		mapNum = 1;
 		i = 0;

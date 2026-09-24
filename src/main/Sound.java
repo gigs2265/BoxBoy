@@ -9,7 +9,7 @@ import javax.sound.sampled.FloatControl;
 
 public class Sound {
 	Clip clip;
-	URL soundURL[] = new URL[30];
+	URL soundURL[] = new URL[35];
 	FloatControl fc;
 	int volumeScale = 3;
 	float volume;
@@ -36,6 +36,13 @@ public class Sound {
 		soundURL[17] = getClass().getResource("/sound/brianhit.wav");   // Brian takes a hit
 		soundURL[18] = getClass().getResource("/sound/briandies.wav");  // Brian dies
 		soundURL[19] = getClass().getResource("/sound/victorytheme.wav"); // "You beat the game" screen music (loops)
+
+		// "PC Mode" sanitized sound variants - see main.Gamepanel.pcSoundIndex()
+		soundURL[20] = getClass().getResource("/sound/pchittaken.wav");    // PC variant of 8
+		soundURL[21] = getClass().getResource("/sound/pcfartblast.wav");   // PC variant of 16
+		soundURL[22] = getClass().getResource("/sound/pcbrianhit.wav");    // PC variant of 17
+		soundURL[23] = getClass().getResource("/sound/pcbriandies.wav");   // PC variant of 18
+		soundURL[24] = getClass().getResource("/sound/pcvictorytheme.wav"); // PC variant of 19
 	}
 	public void setFile(int i) {
 		try {

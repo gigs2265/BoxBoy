@@ -15,6 +15,8 @@ import object.OBJ_Cheese;
 import object.OBJ_Chest;
 import object.OBJ_Dildo_Sword;
 import object.OBJ_Door;
+import object.OBJ_Flats;
+import object.OBJ_FreshTimbs;
 import object.OBJ_Fart_Coin;
 import object.OBJ_Jimmysass;
 import object.OBJ_Key;
@@ -49,6 +51,8 @@ public class SaveLoad {
 			case "Burg": obj = new OBJ_Burger(gp); break;
 			case "Cheese": obj = new OBJ_Cheese(gp); break;
 			case "Rat Tail": obj = new OBJ_Rattail(gp); break;
+			case "Flats": obj = new OBJ_Flats(gp); break;
+			case "Fresh Timbs": obj = new OBJ_FreshTimbs(gp); break;
 			case "$Fartcoin": obj = new OBJ_Fart_Coin(gp); break;
 			case "Titmilk": obj = new OBJ_Titmilk(gp); break;
 			case "Chest": obj = new OBJ_Chest(gp); break;
@@ -85,6 +89,7 @@ public class SaveLoad {
 			// PLAYER INVENTORY
 			ds.currentWeaponSlot = -1;
 			ds.currentShieldSlot = -1;
+			ds.currentBootsSlot = -1;
 			for(int i = 0; i < gp.player.inventory.size(); i++) {
 				ds.itemNames.add(gp.player.inventory.get(i).name);
 				if(gp.player.inventory.get(i) == gp.player.currentWepon) {
@@ -92,6 +97,9 @@ public class SaveLoad {
 				}
 				if(gp.player.inventory.get(i) == gp.player.currentSheild) {
 					ds.currentShieldSlot = i;
+				}
+				if(gp.player.inventory.get(i) == gp.player.currentBoots) {
+					ds.currentBootsSlot = i;
 				}
 			}
 			
@@ -191,8 +199,15 @@ public class SaveLoad {
 			if(ds.currentShieldSlot >= 0 && ds.currentShieldSlot < gp.player.inventory.size()) {
 				gp.player.currentSheild = gp.player.inventory.get(ds.currentShieldSlot);
 			}
+			// Older saves (pre-boots) default currentBootsSlot to 0 - only trust it
+			// if that slot actually holds a boots item, otherwise keep bare feet
+			if(ds.currentBootsSlot >= 0 && ds.currentBootsSlot < gp.player.inventory.size()
+					&& gp.player.inventory.get(ds.currentBootsSlot).type == gp.player.type_boots) {
+				gp.player.currentBoots = gp.player.inventory.get(ds.currentBootsSlot);
+			}
 			gp.player.attack = gp.player.getAttack();
 			gp.player.defense = gp.player.getDefense();
+			gp.player.speed = gp.player.getSpeed();
 			
 			// QUEST PROGRESS
 			gp.quest.foundAllFriends = ds.foundAllFriends;

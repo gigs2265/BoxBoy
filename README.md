@@ -23,7 +23,29 @@ Or open in Eclipse: Refresh (F5) → Clean (Project → Clean) → Run.
 
 ## Version History
 
-### v3 (current)
+### v4 (current)
+**Boots equip slot** — a third equipment slot next to weapon and shield. Boots
+add movement speed: everyone starts in Flats (no bonus), and **Fresh Timbs**
+(+2 speed) can be bought from Josh or found in the walled north clearing. The
+character screen now shows a Speed stat and has its own Equipment window
+showing weapon, shield and boots.
+
+Also in this version:
+- **PC Mode sounds** — PC Mode now also swaps five sound effects (player hit,
+  fart blast, Brian's hit and death sounds, victory theme) for sanitized versions.
+- **New dungeon tiles** — `nickwall` (solid wall) and `rathead` (floor decoration)
+  placed around the dungeon.
+- **Fixed:** selling to Josh paid 0 Fartcoins for most items (keys, Box Cutter,
+  Rat Spray, Bloat, Flats). Every item now has a price, and nothing sells for less than 1.
+- **Fixed:** Bloat couldn't be re-equipped after switching to another shield.
+- **Fixed:** choosing "Leave" at Josh's shop reopened the Buy/Sell menu instead
+  of closing it.
+- **Fixed:** turning on Full Screen gave a black screen.
+- PC Mode name for Jimmy's Ass changed to "Jimmy's Large Backside".
+
+See Modifications 12–17 in `GAME_MODIFICATIONS.md` for implementation detail.
+
+### v3
 **"PC Mode"** — an opt-in, ironic "family friendly" toggle in the Options menu
 (ENTER to check/uncheck, no restart required) that swaps the game's raunchy
 dialogue, item names, monster names, and system messages for a uniformly flat,

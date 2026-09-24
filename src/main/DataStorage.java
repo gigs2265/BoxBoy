@@ -29,6 +29,7 @@ public class DataStorage implements Serializable {
 	ArrayList<String> itemNames = new ArrayList<>();
 	int currentWeaponSlot;
 	int currentShieldSlot;
+	int currentBootsSlot;
 	
 	// QUEST PROGRESS
 	boolean foundAllFriends;

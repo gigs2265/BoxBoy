@@ -74,6 +74,7 @@ public class Entity {
 	public int $fartcoin;
 	public Entity currentWepon;
 	public Entity currentSheild;
+	public Entity currentBoots;
 	public Projectile projectile;
 	
 	
@@ -83,6 +84,7 @@ public class Entity {
 	public int value;
 	public int attackValue;
 	public int defenseValue;
+	public int speedValue; // bonus movement speed granted while equipped (boots) - see Player.getSpeed()
 	public String description = "";
 	public String pcDescription = ""; // "PC Mode" sanitized version of description - see main.PcText
 	public int usedCost;
@@ -100,6 +102,7 @@ public class Entity {
 	public final int type_pickupOnly = 7;
 	public final int type_dildo = 8;
 	public final int type_ass = 9;
+	public final int type_boots = 10;
 	
 	
 	

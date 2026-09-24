@@ -5,13 +5,13 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import entity.Entity;
@@ -140,12 +140,20 @@ public class Gamepanel extends JPanel implements Runnable {
     }
     
     public void setFullScreen() {
+        // Real exclusive fullscreen (GraphicsDevice.setFullScreenWindow) fights
+        // with this game's plain JPanel.getGraphics()-based rendering in
+        // drawToScreen() - the display-mode switch can leave that call drawing
+        // into a stale/invalid graphics context, which shows up as a black
+        // screen. A maximized borderless window avoids the exclusive-mode
+        // handoff entirely while still filling the screen.
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = ge.getDefaultScreenDevice();
-        gd.setFullScreenWindow(Main.window);
-        
-        screenWidth2 = Main.window.getWidth();
-        screenHeight2 = Main.window.getHeight();
+        java.awt.Rectangle bounds = ge.getMaximumWindowBounds();
+
+        Main.window.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        Main.window.setBounds(bounds);
+
+        screenWidth2 = bounds.width;
+        screenHeight2 = bounds.height;
     }
 
     public void startGameThread() {
@@ -311,18 +319,34 @@ public class Gamepanel extends JPanel implements Runnable {
     }
     
     public void playMusic(int i) {
-        music.setFile(i);
+        music.setFile(pcSoundIndex(i));
         music.play();
         music.loop();
     }
-    
+
     public void stopMusic() {
         music.stop();
     }
-    
+
     public void playSE(int i) {
-        se.setFile(i);
+        se.setFile(pcSoundIndex(i));
         se.play();
+    }
+
+    // "PC Mode" sanitized sound swap - see main.Sound for the PC clip indices (20-24)
+    // and res/sound/pc*.wav. Only sounds with an actual PC variant get remapped;
+    // everything else plays unchanged.
+    private int pcSoundIndex(int i) {
+        if(pcMode == true) {
+            switch(i) {
+                case 8: return 20;  // hittaken -> pchittaken
+                case 16: return 21; // fartblast -> pcfartblast
+                case 17: return 22; // brianhit -> pcbrianhit
+                case 18: return 23; // briandies -> pcbriandies
+                case 19: return 24; // victorytheme -> pcvictorytheme
+            }
+        }
+        return i;
     }
 
     // Helper methods for camera bounds clamping

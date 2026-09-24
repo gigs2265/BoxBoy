@@ -16,6 +16,7 @@ public class OBJ_Burger extends Entity {
 		name = "Burg";
 		down1 = setup("/objects/burger", gp.tileSize, gp.tileSize);
 		defenseValue = 1;
+		price = 2;
 		
 	}
 

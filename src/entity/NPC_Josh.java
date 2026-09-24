@@ -6,6 +6,7 @@ import object.OBJ_Beer;
 import object.OBJ_Dildo_Sword;
 import object.OBJ_Jimmysass;
 import object.OBJ_Spicyburger;
+import object.OBJ_FreshTimbs;
 
 public class NPC_Josh extends Entity {
 	
@@ -74,6 +75,7 @@ public class NPC_Josh extends Entity {
 		inventory.add(new OBJ_Jimmysass(gp));
 		inventory.add(new OBJ_Spicyburger(gp));
 		inventory.add(new OBJ_Dildo_Sword(gp));
+		inventory.add(new OBJ_FreshTimbs(gp));
 		
 		// Keys for sale - used to unlock the cell doors holding the captured characters
 		object.OBJ_Key key = new object.OBJ_Key(gp);
@@ -112,7 +114,16 @@ public class NPC_Josh extends Entity {
 	public void speak() {
 		gp.ui.currentDialouge = dialouges[0];
 		super.speak();
-		gp.gameState = gp.tradeState;
-		gp.ui.npc = this;
+
+		// Only open the shop right after his intro line is shown (dialougeIndex
+		// just advanced to 1). super.speak() resets dialougeIndex back to 0 and
+		// exits to playState once dialogue wraps - which is also how this method
+		// gets called again to dismiss the trade menu's "See you later!" message
+		// (KeyHandler.dialogueState() re-invokes speak() on ENTER). Forcing
+		// tradeState back open in that case would trap the player in a loop.
+		if(dialougeIndex != 0) {
+			gp.gameState = gp.tradeState;
+			gp.ui.npc = this;
+		}
 	}
 }

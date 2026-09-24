@@ -15,6 +15,7 @@ public class OBJ_Key extends Entity {
 				
 		name = "Key";
 		down1 = setup("/objects/key", gp.tileSize, gp.tileSize);
+		price = 10; // same as Josh sells them for
 		description = "["+name+"]\nI can probably use this to unlock \n doors and chests.";
 	}
 

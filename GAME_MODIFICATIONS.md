@@ -15,6 +15,8 @@ This is a 2D action RPG Java game called "Box Boy!" built with Java Swing/AWT. T
 
 This file supersedes the older `GAME_MODIFICATIONS.md` history and the separate `BOXBOYNOTES.md` (both deleted 2026-09-21) — it reflects what's actually in the code now, in one place.
 
+**Maintenance note:** this file gets updated alongside every code change from here on, not just in a batch afterward — new modifications get their own numbered section (or an existing one gets amended in place, e.g. when a later fix changes how an earlier mod's UI is laid out) as soon as the change is made, so this doc never drifts out of sync with the code.
+
 ---
 
 ## Codebase Map
@@ -24,7 +26,7 @@ src/
   main/     - engine: game loop, input, collision, events, UI, quest, save/load, sound
   entity/   - Entity base class, Player, Projectile, NPC_* (7 friends)
   monster/  - MON_Tuchi, MON_Armored_Tuchi, MON_Kunt_Krab, MON_Nick, MON_Brian
-  object/   - weapons, shields, consumables, doors, chest, keys, coins
+  object/   - weapons, shields, boots, consumables, doors, chest, keys, coins
   tile/     - Tile, TileManager (loads maps from res/maps/*.txt)
 ```
 
@@ -196,7 +198,7 @@ For content that's a whole array rather than one string (cutscene line lists, th
 | System/menu text | `gp.pcMode ? ... : ...` ternary inline | Victory screen ("You beat the game!" body text + "Thanks for wasting your time" line), Game Over screen title ("You Suck!" → "Nice Try!"), the full-screen-restart notice, the title-screen and options-menu "Fuck Off" labels (→ "Exit Kindly", picked to be short enough it doesn't overflow the title screen's fixed-width menu columns) |
 | NPC quest dialogue | `Entity.pcDialouges[]` (parallel to `dialouges[]`, same index), picked inside the shared `Entity.speak()` | All 7 NPCs, full line-for-line rewrite (Vic 11, Mike 1, Ian 12, Liam 14, Miles 13, John 7, Josh 1 — 59 lines total) |
 | NPC idle bubbles | A per-NPC `idlePcDialogues[]` field (parallel to `idleDialogues[]`), picked at the point each NPC rolls a random idle line in `setAction()` | All 7 NPCs × 12 lines = 84 lines total |
-| Item **names** (not just descriptions) | `Entity.pcName` field (parallel to `pcDescription`), plus `Entity.getDisplayName(gp)` helper; picked inline via `PcText.pick(gp, name, pcName)` at every draw site | Only the two names that are actually profane — `"$Fartcoin"` → `"$FlatuCoin"`, `"Jimmy's Big Fat Ass"` → `"Jimmy's Generous Donation"`. Already-clean names (Beer, Rat Tail, Box Cutter, Hot Burg, Ian's Sword, Bloat, Rat Spray) were deliberately left alone — their crude humor lives only in descriptions, which was already covered above. |
+| Item **names** (not just descriptions) | `Entity.pcName` field (parallel to `pcDescription`), plus `Entity.getDisplayName(gp)` helper; picked inline via `PcText.pick(gp, name, pcName)` at every draw site | Only the two names that are actually profane — `"$Fartcoin"` → `"$FlatuCoin"`, `"Jimmy's Big Fat Ass"` → `"Jimmy's Large Backside"` (was "Jimmy's Generous Donation" in v3, renamed in v4). Already-clean names (Beer, Rat Tail, Box Cutter, Hot Burg, Ian's Sword, Bloat, Rat Spray) were deliberately left alone — their crude humor lives only in descriptions, which was already covered above. |
 | Monster **name** | Same `Entity.pcName`/`getDisplayName(gp)` mechanism | `MON_Kunt_Krab`: `"a Kunt Krab"` → `"a Kitty Krab"` in the "You killed ...!" kill message (`Player.damageMonster()`). The identity string used for boss-kill routing (`monsterName.equals("Brian")`/`"Nick"`) is untouched — only the display call at the kill-message line was swapped to `getDisplayName(gp)`. |
 | Level-up message | `gp.pcMode ? ... : ...` ternary inline in `Player.checkLevelUp()` (a spot the original coverage sweep missed) | `"Your dumbass reached level X\nGood job idiot!"` → `"Great job! You reached level X!\nYou are so good at this game!"` |
 
@@ -228,12 +230,113 @@ In-game playtest confirmed all dialogue (NPC quest lines, idle bubbles, item des
 - [x] Pause menu "Back" button spilling past the frame border — fixed, see above.
 - [x] Item name PC rewrites (`$Fartcoin`/Jimmy's Ass) implemented — compiled clean, not yet playtested.
 - [x] Monster name PC rewrite (`Kunt Krab` → `Kitty Krab`) implemented — compiled clean, not yet playtested.
-- [ ] **Playtest the new item-name PC rewrites specifically:** pick up a Fartcoin (world + chest) and check the pickup message/HUD balance/character-screen label all show "FlatuCoin" under PC Mode; buy/sell at Josh's shop and check the price window + "Not enough FlatuCoins." error; view Jimmy's Ass's item-detail popup under PC Mode and confirm the bracketed header shows "Jimmy's Generous Donation" not the original name.
+- [ ] **Playtest the new item-name PC rewrites specifically:** pick up a Fartcoin (world + chest) and check the pickup message/HUD balance/character-screen label all show "FlatuCoin" under PC Mode; buy/sell at Josh's shop and check the price window + "Not enough FlatuCoins." error; view Jimmy's Ass's item-detail popup under PC Mode and confirm the bracketed header shows "Jimmy's Large Backside" not the original name.
 - [ ] **Playtest the Kunt Krab rename:** kill one under PC Mode and confirm the kill message reads "You killed a Kitty Krab!" not the original name.
 - [x] Level-up message PC rewrite implemented — compiled clean, not yet playtested.
 - [ ] Confirm config.txt round-trips correctly from the real game (quit after toggling PC Mode on, relaunch, check it's still on) — logic was verified with a standalone harness but never through the actual `Main`/`Config` path.
 - [ ] If anything reads awkwardly in-game (line wrapping in the dialogue box, a line running past the item-description subwindow, etc.), that's a real find the static checks couldn't catch — the dialogue/description boxes wrap on `\n` you place manually, so a rewritten line with different length than the original could sit differently even if it's under the same character-ish budget.
 - [ ] Optional: extend PC Mode coverage to anything found in step 1 that got missed (see the Future Enhancement Ideas note on this).
+
+---
+
+## Modification 12: Boots Equip Slot & Fresh Timbs
+
+**Status: shipped in v4 - playtested, confirmed working.**
+
+A third equip slot alongside weapon and shield: boots, which affect movement speed instead of attack/defense.
+
+- **`Entity.type_boots`** (type 10) is the new item type, and **`Entity.speedValue`** (parallel to `attackValue`/`defenseValue`) is the stat it carries.
+- **`Entity.currentBoots`** is the new equip-slot field, parallel to `currentWepon`/`currentSheild`.
+- **`Player.baseSpeed`** replaces the old hardcoded `speed = 4` in `setDefaultValues()` - `speed` itself is now always derived via **`Player.getSpeed()`** (`baseSpeed + currentBoots.speedValue`), the same pattern `getAttack()`/`getDefense()` already used for strength/dexterity. `getSpeed()` is called on equip (`selectItem()`), on `setDefaultValues()`, and after `SaveLoad.load()`.
+- **`object.OBJ_Flats`** - the default boots (`speedValue = 0`), equivalent to Rat Spray/Bloat being the default weapon/shield. Player always starts with a pair equipped (`setDefaultValues()`/`setItems()`) so `currentBoots` is never null.
+- **`object.OBJ_FreshTimbs`** - the new purchasable/found item (`speedValue = 2`, price 2). Sold at both of Josh's shop locations (dungeon + hut, same `NPC_Josh.setItems()`); one free copy also placed on the overworld at (40, 3), in the walled north clearing.
+
+**UI:** `UI.drawCharacterScreen()` gained a "Speed" stat line (grouped with Attack/Defense) and a "Stats" title (same centered-title style as the Equipment window below). Equipment icons (weapon/shield/boots) no longer live in the stats window at all — adding the boots icon there originally overflowed the frame, so equipment now has its **own window**: `UI.drawEquipmentWindow(frameX, frameY)`, same `drawSubWindow()` style, titled "Equipment", positioned immediately to the right of the stats window (`frameX + frameWidth` of the stats frame, same `frameY`), sized 4×5 tiles. Each row is `Weapon:`/`Shield:`/`Boots:` with its icon drawn inline at half size (`gp.tileSize/2`, scaled down from the native 48px via the `drawImage(img,x,y,w,h,null)` overload) immediately after the label, rather than stacked label-above-full-size-icon — keeps each item on one line and leaves the window shorter. There's a clear 1-tile gap before the inventory grid window further right. `UI.drawInventory()`'s equipped-item highlight and the trade screen's "can't sell equipped" check both now also check `currentBoots`.
+
+**Save/Load:** `DataStorage.currentBootsSlot` persists which inventory slot is equipped as boots, mirroring `currentWeaponSlot`/`currentShieldSlot`. Because `DataStorage`'s `serialVersionUID` is pinned at `1L`, older save files missing this field just deserialize it as `0` rather than failing to load - `SaveLoad.load()` guards against that by only trusting the restored slot if the item actually sitting there is `type_boots`, otherwise the constructor's default Flats stay equipped. `SaveLoad.getObject()` also gained `"Flats"`/`"Fresh Timbs"` name→object cases.
+
+**Files:** `entity/Entity.java` (`type_boots`, `speedValue`, `currentBoots`), `entity/Player.java` (`baseSpeed`, `getSpeed()`, equip handling), `object/OBJ_Flats.java` (new), `object/OBJ_FreshTimbs.java` (new), `entity/NPC_Josh.java` (shop stock), `main/AssetSetter.java` (overworld pickup), `main/UI.java` (Speed row, new `drawEquipmentWindow()`, equip-highlight/sell checks), `main/DataStorage.java` + `main/SaveLoad.java` (persistence)
+
+---
+
+## Modification 13: New Decorative/Wall Tiles (nickwall, rathead)
+
+**Status: shipped in v4 - playtested, confirmed working.**
+
+Two new tile art assets registered in `TileManager`:
+
+- **`tile[45]` "nickwall"** - a collidable wall variant (`collision = true`), loaded from `/tiles/nickwall.png.png` (the source file itself has a double `.png` extension, so the resource path spells it out literally rather than relying on any auto-append).
+- **`tile[46]` "rathead"** - a decorative floor overlay (no collision), loaded from `/tiles/rathead.png`.
+
+`tile[]` array size grew from 47 to 49 slots to fit both.
+
+**Placements (dungeon map, `dundgonmap.txt`):**
+- rathead at (col 10, row 32), (col 26, row 11), (col 36, row 6) - all previously plain floor.
+- nickwall ×3 side-by-side at row 2, cols 28/29/30 - directly above the open room at row 3, replacing plain wall tiles.
+
+**Files:** `tile/TileManager.java` (tile registration), `res/maps/dundgonmap.txt` (placements)
+
+---
+
+## Modification 14: PC Mode Sound Effects
+
+**Status: shipped in v4 - playtested, confirmed working.**
+
+Extends "PC Mode" (Modification 11) from text-only to also swap sound effects, via an indirection layer that only PC-affected clips pass through.
+
+- **`Gamepanel.pcSoundIndex(int i)`** - private helper checked inside `playMusic()`/`playSE()`. If `pcMode` is on, remaps a small set of clip indices to their PC variants; everything else (the large majority of sounds) passes through unchanged.
+- Remapped: 8 (hittaken)→20, 16 (fartblast)→21, 17 (brianhit)→22, 18 (briandies)→23, 19 (victorytheme)→24.
+- **`Sound.java`**: `soundURL[]` grew from 30 to 35 slots to hold the 5 new PC clips (`pchittaken.wav`, `pcfartblast.wav`, `pcbrianhit.wav`, `pcbriandies.wav`, `pcvictorytheme.wav`), all under `res/sound/`.
+
+**Files:** `main/Gamepanel.java` (`pcSoundIndex()`), `main/Sound.java` (new clip slots)
+
+---
+
+## Modification 15: Bug Fixes (Bloat re-equip, Josh shop "Leave" loop)
+
+**Status: shipped in v4 - playtested, confirmed working.**
+
+Two unrelated bugs found and fixed while testing the boots feature (Modification 12):
+
+**Bloat could not be re-equipped after switching shields.** `OBJ_Bloat` (the starting/default shield) never set `type` in its constructor, so it defaulted to `0` (`type_player`) instead of `type_sheild`. `Player.selectItem()`'s equip logic branches on `selectedItem.type == type_sheild`, so selecting Bloat from the inventory silently did nothing once you'd switched to Hot Burg (or any other shield) - the only reason this went unnoticed earlier is that Bloat is pre-equipped at game start, so nobody had tried to re-select it from the inventory grid until now. Fixed by adding `type = type_sheild;` to `OBJ_Bloat`'s constructor.
+
+**Talking to Josh, then picking "Leave," dropped you back into the Buy/Sell/Leave menu instead of closing it** - you had to select Leave twice. Root cause: `NPC_Josh.speak()` unconditionally set `gameState = tradeState` after every call to `super.speak()`, but `speak()` is also the same method `KeyHandler.dialogueState()` re-invokes on ENTER to dismiss Josh's farewell line ("See you later!") once `Entity.speak()`'s dialogue-exhausted branch has already routed back to `playState`. The unconditional trade-state assignment ran *after* that and stomped it back to `tradeState`. Fixed by only opening the shop when `dialougeIndex != 0` right after `super.speak()` - true exactly when a line was just shown (dialogue still in progress), false when `Entity.speak()` just wrapped `dialougeIndex` back to 0 on exhaustion (dialogue finished, already routed to `playState` - don't reopen the shop). `Entity.dialogueComplete` was considered as the guard instead but rejected: it's a one-way flag that never resets to `false`, so it would correctly skip the shop the first time but then never let it reopen on any later visit.
+
+**Files:** `object/OBJ_Bloat.java` (added `type = type_sheild`), `entity/NPC_Josh.java` (`speak()` guard)
+
+---
+
+## Modification 16: Fullscreen Black Screen Fix
+
+**Status: shipped in v4 - playtested, confirmed working.**
+
+**Problem:** turning on Full Screen (Options menu -> restart) produced a black screen instead of the game.
+
+**Root cause:** `Gamepanel.setFullScreen()` used `GraphicsDevice.setFullScreenWindow()` - real exclusive fullscreen mode. That conflicts with how this game actually renders: `drawToScreen()` calls plain `JPanel.getGraphics()` every frame and draws into whatever it returns, which is the pattern Swing/AWT explicitly warns against once a `GraphicsDevice` owns the screen exclusively - the display-mode handoff can leave that call drawing into a stale or invalid graphics context. On top of that, `screenWidth2`/`screenHeight2` were read from `Main.window.getWidth()/getHeight()` *immediately* after `setFullScreenWindow()` returned, before the window's resize to the new display mode was guaranteed to have actually happened - a race that could hand `drawToScreen()`'s final `drawImage()` a 0x0 (or otherwise wrong) target size.
+
+**Fix:** `setFullScreen()` no longer touches `GraphicsDevice` at all. It maximizes the (already undecorated, per `Main.java`) window instead - `Main.window.setExtendedState(JFrame.MAXIMIZED_BOTH)` plus an explicit `setBounds()` to the screen's usable area (`GraphicsEnvironment.getMaximumWindowBounds()`, read synchronously, no race) - which fills the screen without ever taking exclusive ownership of the display, so the existing `getGraphics()`-based render path keeps working normally. `screenWidth2`/`screenHeight2` are set directly from those same bounds. The `JFrame`'s content pane already uses the default `BorderLayout` (`window.add(gamePanel)` with no constraint = `BorderLayout.CENTER`), so `gamePanel` automatically resizes to fill the maximized window and `getGraphics()` returns a correctly-sized context - no other changes needed.
+
+Fullscreen still only takes effect on the next full restart (unchanged - toggling it in the Options menu still just flips `fullScreenOn` and shows the existing "restart required" notice; `setFullScreen()` is only ever called once, from `setupGame()`).
+
+**Files:** `main/Gamepanel.java` (`setFullScreen()` rewritten, dropped the now-unused `GraphicsDevice` import)
+
+---
+
+## Modification 17: Selling to Josh Paid 0 Fartcoins
+
+**Status: shipped in v4 - playtested, confirmed working.**
+
+**Problem:** selling items to Josh (reported at the hut, but both Josh placements share the same code) removed the item but paid nothing.
+
+**Root cause:** `UI.trade_sell()` pays `item.price / 2`, but most items never set `price`, so it defaulted to `0`: Key (every key found in the world or carried from the start - only the keys Josh sells had `price = 10`, set in `NPC_Josh.setItems()`), Box Cutter, Rat Spray, Bloat, Flats, and Burg. On top of that, integer division meant any price-1 item would also sell for 0.
+
+**Fix:**
+- Added base prices: Rat Spray 2, Bloat 2, Burg 2, Flats 2, Box Cutter 6, Key 10 (matching Josh's price, so free and bought keys now both sell for 5).
+- `trade_sell()` now pays `Math.max(1, price / 2)`, so no item can ever sell for 0.
+
+Selling an equipped item is still blocked, as before.
+
+**Files:** `main/UI.java` (`trade_sell()`), `object/OBJ_Spray_Normal.java`, `object/OBJ_Boxcutter.java`, `object/OBJ_Bloat.java`, `object/OBJ_Burger.java`, `object/OBJ_Flats.java`, `object/OBJ_Key.java` (added `price`)
 
 ---
 
@@ -287,8 +390,8 @@ In-game playtest confirmed all dialogue (NPC quest lines, idle bubbles, item des
 
 ## Important Constants Cheat Sheet
 
-- `type_ass = 9` (Jimmy's Ass weapon type); other weapon types: `type_spray=3`, `type_cutter=4`, `type_dildo=8`
-- Sound effects: 4=pickup/use, 5=unlock, 6=spray/milkshot fire, 7=hit monster, 8=hit player, 9=level up, 10=cursor, 11=puke/shoot, 12=coin, 13/3=die, 14=transition, 15=dungeon music, 16=fart blast, 17=Brian hit, 18=Brian dies, 19=victory theme
+- `type_ass = 9` (Jimmy's Ass weapon type); other weapon types: `type_spray=3`, `type_cutter=4`, `type_dildo=8`; `type_boots = 10` (Flats/Fresh Timbs)
+- Sound effects: 4=pickup/use, 5=unlock, 6=spray/milkshot fire, 7=hit monster, 8=hit player, 9=level up, 10=cursor, 11=puke/shoot, 12=coin, 13/3=die, 14=transition, 15=dungeon music, 16=fart blast, 17=Brian hit, 18=Brian dies, 19=victory theme, 20-24=PC Mode variants of 8/16/17/18/19 (see Modification 14)
 - Map 0 = Overworld, Map 1 = Dungeon, Map 2 = Josh's Hut
 - `currentNPC = 999` means no NPC is being talked to; the same `999` sentinel is reused for "no index found" in `CollisionChecker` and inventory search
 - `heavyHitter = true` on: Armored Tuchi, Kunt Krab, Brian, Brian's Titmilk projectile (Nick is NOT a heavy hitter)
@@ -316,3 +419,4 @@ Eclipse workflow: modify → refresh project (F5) → Clean (Project → Clean) 
 - Dialogue skip/fast-forward option
 - Achievement system tied to quests
 - PC Mode: extend to any remaining flavor text found later (only the areas listed in Modification 11's coverage table were touched — a fresh grep for profanity across `src/` is the fastest way to check for stragglers before assuming coverage is total)
+- More boots beyond Flats/Fresh Timbs (e.g. a negative-speed "heavy boots" tradeoff item, or a defense/speed hybrid) now that the `type_boots` slot exists (Modification 12)

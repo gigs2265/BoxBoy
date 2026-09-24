@@ -9,7 +9,7 @@ public class OBJ_Jimmysass extends Entity {
 		super(gp);
 		type = type_ass;
 		name = "Jimmy's Big Fat Ass";
-		pcName = "Jimmy's Generous Donation";
+		pcName = "Jimmy's Large Backside";
 		down1 = setup("/objects/jimmysass", gp.tileSize, gp.tileSize);
 		attackValue = 5;
 		attackArea.width = 30;

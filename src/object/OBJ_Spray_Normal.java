@@ -11,6 +11,7 @@ public class OBJ_Spray_Normal extends Entity{
 		name = "Rat Spray";
 		down1 = setup("/objects/ratspray",gp.tileSize, gp.tileSize);
 		attackValue = 1;
+		price = 2;
 		attackArea.width = 36;
 		attackArea.height = 36;
 		description = "["+name+"]\n Standard Rat Killer.";

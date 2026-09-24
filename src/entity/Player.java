@@ -17,6 +17,7 @@ import object.OBJ_VicDoor;
 import object.OBJ_Key;
 import object.OBJ_Milkshot;
 import object.OBJ_Spray_Normal;
+import object.OBJ_Flats;
 
 public class Player extends Entity {
 
@@ -40,10 +41,12 @@ public class Player extends Entity {
         setItems();
     }
 
+    public int baseSpeed; // speed before boots - see getSpeed()
+
     public void setDefaultValues() {
         worldX = gp.tileSize * 23;
         worldY = gp.tileSize * 21;
-        speed = 4;
+        baseSpeed = 4;
         direction = "down";
 
         level = 1;
@@ -58,9 +61,11 @@ public class Player extends Entity {
         $fartcoin = 5;
         currentWepon = new OBJ_Spray_Normal(gp);
         currentSheild = new OBJ_Bloat(gp);
+        currentBoots = new OBJ_Flats(gp);
         projectile = new OBJ_Milkshot(gp);
         attack = getAttack();
         defense = getDefense();
+        speed = getSpeed();
     }
     
     public void setDefaultPositions() {
@@ -87,16 +92,21 @@ public class Player extends Entity {
         inventory.clear();
         inventory.add(currentWepon);
         inventory.add(currentSheild);
+        inventory.add(currentBoots);
         inventory.add(new OBJ_Key(gp));
     }
-    
+
     public int getAttack() {
         attackArea = currentWepon.attackArea;
         return attack = strength * currentWepon.attackValue;
     }
-    
+
     public int getDefense() {
         return defense = dexterity * currentSheild.defenseValue;
+    }
+
+    public int getSpeed() {
+        return speed = baseSpeed + currentBoots.speedValue;
     }
 
     // Death animation sprites
@@ -521,6 +531,10 @@ public class Player extends Entity {
             if(selectedItem.type == type_sheild) {
                 currentSheild = selectedItem;
                 defense = getDefense();
+            }
+            if(selectedItem.type == type_boots) {
+                currentBoots = selectedItem;
+                speed = getSpeed();
             }
             if(selectedItem.type == type_consumable) {
                 selectedItem.use(this);
